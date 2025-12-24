@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C8C2FFC1-FA3A-4D6F-B8EF-6C3CA4CF2101}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inamsoft.MediaFileRenamer", "src\Inamsoft.MediaFileRenamer\Inamsoft.MediaFileRenamer.csproj", "{38FABC10-DCEC-472F-8210-A0E2A7327AA7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{38FABC10-DCEC-472F-8210-A0E2A7327AA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38FABC10-DCEC-472F-8210-A0E2A7327AA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38FABC10-DCEC-472F-8210-A0E2A7327AA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38FABC10-DCEC-472F-8210-A0E2A7327AA7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{38FABC10-DCEC-472F-8210-A0E2A7327AA7} = {C8C2FFC1-FA3A-4D6F-B8EF-6C3CA4CF2101}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E4BCEFAE-66BD-4278-9BF7-B37285CA1E8E}
+	EndGlobalSection
+EndGlobal

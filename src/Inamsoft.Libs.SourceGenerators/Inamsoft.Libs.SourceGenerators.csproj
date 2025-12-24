@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- 👇 Source generators must target netstandard 2.0 -->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!-- 👇 We don't want to reference the source generator dll directly in consuming projects -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- 👇 New project, why not! -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>true</ImplicitUsings>
+    <LangVersion>Latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <!-- Generates a package at build -->
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- Do not include the generator as a lib dependency -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="bin\Debug\netstandard2.0\\Inamsoft.Libs.SourceGenerators.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Package the generator in the analyzer directory of the nuget package -->
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Inamsoft.Libs.SourceGenerators.Attributes\Inamsoft.Libs.SourceGenerators.Attributes.csproj" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>
