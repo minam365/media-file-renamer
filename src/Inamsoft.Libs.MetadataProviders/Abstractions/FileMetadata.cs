@@ -3,7 +3,8 @@ using Inamsoft.Libs.SourceGenerators.Attributes;
 
 namespace Inamsoft.Libs.MetadataProviders.Abstractions;
 
-[AutoDictionary()]
+//[AutoDictionary()]
+[GenerateDictionary()]
 public partial record FileMetadata
 {
     public string FilePath { get; set; } = string.Empty;
@@ -12,7 +13,7 @@ public partial record FileMetadata
     public string FileExtension { get; set; } = string.Empty;
     public string DirectoryName { get; set; } = string.Empty;
     public string DirectoryPath { get; set; } = string.Empty;
-    public long SizeInBytes { get; set; }
+    public long Length { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime ModifiedAt { get; set; }
 

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using AutoDictionary;
+using Inamsoft.Libs.SourceGenerators.Attributes;
 
 namespace Inamsoft.Libs.MetadataProviders.Abstractions;
 
-[AutoDictionary()]
+//[AutoDictionary()]
+[GenerateDictionary()]
 public partial record PhotoFileMetadata
 {
     public string? CameraMake { get; init; }

@@ -38,7 +38,7 @@ public abstract class BaseMetadataProvider<TMetadataProvider>
             metadata.CreatedAt = fi.CreationTime;
             metadata.ModifiedAt = fi.LastWriteTime;
 
-            metadata.SizeInBytes = fi.Length;
+            metadata.Length = fi.Length;
         }
         return metadata;
     }

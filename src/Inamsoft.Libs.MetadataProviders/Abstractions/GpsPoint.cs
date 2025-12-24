@@ -8,7 +8,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="GpsPoint"/> class.
         /// </summary>
-        public GpsPoint()
+        protected GpsPoint()
         {
 
         }
@@ -19,7 +19,7 @@
         /// <param name="degrees">The degrees value of the GPS coordinate.</param>
         /// <param name="minutes">The minutes value of the GPS coordinate.</param>
         /// <param name="seconds">The seconds value of the GPS coordinate.</param>
-        public GpsPoint(double degrees, double minutes, double seconds)
+        protected GpsPoint(double degrees, double minutes, double seconds)
         {
             Degrees = degrees;
             Minutes = minutes;
@@ -65,7 +65,7 @@
         /// Determines whether the point 
         /// lies on the South hemisphere or on the West side of the meridian.
         /// </summary>
-        /// <returns><code>true</code> if the pointl ies on the South hemisphere or on the West side of the meridian; 
+        /// <returns><code>true</code> if the point lies on the South hemisphere or on the West side of the meridian; 
         /// otherwise, <code>false</code>.</returns>
         internal abstract bool IsNegativePoint();
 

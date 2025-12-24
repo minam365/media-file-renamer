@@ -1,6 +1,9 @@
-﻿namespace Inamsoft.Libs.MetadataProviders.Abstractions
+﻿using Inamsoft.Libs.SourceGenerators.Attributes;
+
+namespace Inamsoft.Libs.MetadataProviders.Abstractions
 {
-    public record GpsLongitude : GpsPoint
+    [GenerateDictionary]
+    public partial record GpsLongitude : GpsPoint
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GpsLongitude"/> class.
