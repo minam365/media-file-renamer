@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AutoDictionary;
 
 namespace Inamsoft.Libs.MetadataProviders.Abstractions;
 
-public record PhotoFileMetadata : FileMetadata
+[AutoDictionary()]
+public partial record PhotoFileMetadata
 {
     public string? CameraMake { get; init; }
     public string? CameraModel { get; init; }
@@ -16,8 +18,8 @@ public record PhotoFileMetadata : FileMetadata
     public DateTime? TakenAt { get; init; }
     public DateTime? DigitizedAt { get; init; }
 
-    public int? Height { get; init; } = null;
-    public int? Width { get; init; } = null;
+    public int? Height { get; set; } = null;
+    public int? Width { get; set; } = null;
 
     public string? XResolution { get; set; }
 
@@ -30,5 +32,7 @@ public record PhotoFileMetadata : FileMetadata
 
     public GpsLatitude? GpsLatitude { get; set; }
     public GpsLongitude? GpsLongitude { get; set; }
+
+    public required FileMetadata FileMetadata { get; init; }
 
 }

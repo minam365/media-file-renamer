@@ -1,8 +1,9 @@
-﻿using Inamsoft.Libs.SourceGenerators.Attributes;
+﻿using AutoDictionary;
+using Inamsoft.Libs.SourceGenerators.Attributes;
 
 namespace Inamsoft.Libs.MetadataProviders.Abstractions;
 
-[GenerateDictionary()]
+[AutoDictionary()]
 public partial record FileMetadata
 {
     public string FilePath { get; set; } = string.Empty;

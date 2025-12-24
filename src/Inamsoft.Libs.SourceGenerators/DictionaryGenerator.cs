@@ -10,50 +10,306 @@ namespace Inamsoft.Libs.SourceGenerators;
 [Generator]
 public sealed partial class DictionaryGenerator : IIncrementalGenerator
 {
+    private const string AttributeNamespacedName = "Inamsoft.Libs.SourceGenerators";
+    
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
 
-        context.RegisterPostInitializationOutput(ctx =>
+        // 1. Inject attributes
+        context.RegisterPostInitializationOutput(static ctx =>
         {
-            ctx.AddEmbeddedAttributeDefinition();
-            ctx.AddSource("MyExampleAttribute.g.cs", @"
-                namespace HelloWorld
-                {
-                    // 👇 Use the attribute
-                    [global::Microsoft.CodeAnalysis.EmbeddedAttribute]
-                    internal class MyExampleAttribute: global::System.Attribute {} 
-                }");
+            ctx.AddSource("AutoDictionaryAttribute.g.cs", """
+namespace AutoDictionary
+{
+    [System.AttributeUsage(
+        System.AttributeTargets.Class |
+        System.AttributeTargets.Struct)]
+    public sealed class AutoDictionaryAttribute : System.Attribute { }
+    
+    [System.AttributeUsage(
+        System.AttributeTargets.Property |
+        System.AttributeTargets.Field)]
+    public sealed class AutoDictionaryIgnoreAttribute : System.Attribute { }
+}
+""");
         });
-
+        
+        // 2. Find candidate type declarations with attributes
         var typeDeclarations = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (node, _) =>
-                    node is RecordDeclarationSyntax or ClassDeclarationSyntax or StructDeclarationSyntax,
-                transform: static (ctx, _) => ctx.SemanticModel.GetDeclaredSymbol((TypeDeclarationSyntax)ctx.Node) as INamedTypeSymbol
-            )
-            .Where(static t => t is not null);
+                    node is TypeDeclarationSyntax { AttributeLists.Count: > 0 },
+                transform: static (ctx, _) =>
+                {
+                    var typeDecl = (TypeDeclarationSyntax)ctx.Node;
+                    var symbol = ctx.SemanticModel.GetDeclaredSymbol(typeDecl) as INamedTypeSymbol;
+                    return symbol;
+                })
+            .Where(static symbol => symbol is not null);
 
-        var candidates = typeDeclarations.Select(
-            static (typeDecl, _) => typeDecl
-        );
+        // 3. Filter to types marked with [AutoDictionary]
+        var markedTypes = typeDeclarations
+            .Where(static symbol =>
+                symbol!.GetAttributes().Any(a =>
+                    a.AttributeClass?.ToDisplayString() == "AutoDictionary.AutoDictionaryAttribute"));
 
-        //var withAttribute = candidates.Where(static symbol =>
-        //    symbol!.GetAttributes().Any(a =>
-        //        a.AttributeClass?.ToDisplayString() == "Inamsoft.Libs.SourceGenerators.Attributes.GenerateDictionaryAttribute"));
-
-        var attr = candidates.Select(static (symbol, _) =>
-            symbol!.GetAttributes());
-
-        var withAttribute = candidates;
-
-        context.RegisterPostInitializationOutput(ctx =>
+        // 4. Generate the source per marked type
+        context.RegisterSourceOutput(markedTypes, static (spc, typeSymbol) =>
         {
-            ctx.AddSource("MyExampleAttribute2.g.cs", $"{candidates}");
+            var source = GenerateToDictionary(typeSymbol!);
+            //var source = GenerateExtensionsFor(typeSymbol!);
+            spc.AddSource($"{GetSafeTypeName(typeSymbol!)}_ToDictionary.g.cs", source);
         });
-
-
-        context.RegisterSourceOutput(withAttribute, GenerateDictionaryForType);
+        
+        // var typeDeclarations = context.SyntaxProvider
+        //     .CreateSyntaxProvider(
+        //         predicate: static (node, _) =>
+        //             node is RecordDeclarationSyntax or ClassDeclarationSyntax or StructDeclarationSyntax,
+        //         transform: static (ctx, _) => ctx.SemanticModel.GetDeclaredSymbol((TypeDeclarationSyntax)ctx.Node) as INamedTypeSymbol
+        //     )
+        //     .Where(static t => t is not null);
+        //
+        // var candidates = typeDeclarations.Select(
+        //     static (typeDecl, _) => typeDecl
+        // );
+        //
+        // //var withAttribute = candidates.Where(static symbol =>
+        // //    symbol!.GetAttributes().Any(a =>
+        // //        a.AttributeClass?.ToDisplayString() == "Inamsoft.Libs.SourceGenerators.Attributes.GenerateDictionaryAttribute"));
+        //
+        // var attr = candidates.Select(static (symbol, _) =>
+        //     symbol!.GetAttributes());
+        //
+        // var withAttribute = candidates;
+        //
+        // context.RegisterPostInitializationOutput(ctx =>
+        // {
+        //     ctx.AddSource("MyExampleAttribute2.g.cs", $"{candidates}");
+        // });
+        //
+        //
+        // context.RegisterSourceOutput(withAttribute, GenerateDictionaryForType);
     }
+    
+    private static string GenerateToDictionary(INamedTypeSymbol typeSymbol)
+    {
+        var ns = typeSymbol.ContainingNamespace.IsGlobalNamespace
+            ? null
+            : $"namespace {typeSymbol.ContainingNamespace};";
+
+        var typeName = typeSymbol.Name;
+        var typeKindKeyword = typeSymbol.TypeKind switch
+        {
+            TypeKind.Class when typeSymbol is { IsRecord: false } => "class",
+            TypeKind.Class when typeSymbol is { IsRecord: true } => "record",
+            TypeKind.Struct => "struct",
+            // There is no TypeKind.Record or TypeKind.RecordStruct in Roslyn's TypeKind enum.
+            // Use IsRecord property to check for records.
+            _ when typeSymbol is { IsRecord: true, TypeKind: TypeKind.Struct } => "record struct",
+            _ when typeSymbol.IsRecord => "record",
+            _ => "class"
+        };
+
+        var props = typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p => p.GetMethod is not null && p.DeclaredAccessibility == Accessibility.Public)
+            .ToImmutableArray();
+
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated />");
+        sb.AppendLine();
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine();
+        sb.AppendLine("using System.Collections.Generic;");
+        sb.AppendLine("using System.Collections.ObjectModel;");
+        sb.AppendLine();
+
+        if (ns is not null)
+        {
+            sb.AppendLine(ns);
+            sb.AppendLine();
+        }
+
+        sb.AppendFormat("// BaseType: {0}", typeSymbol.BaseType).AppendLine();
+        sb.AppendFormat("// Kind: {0}", typeSymbol.TypeKind).AppendLine();
+        sb.AppendFormat("// IsRecord: {0}", typeSymbol.IsRecord).AppendLine();
+
+        sb.Append("public partial ").Append(typeKindKeyword).Append(' ')
+            .Append(typeName);
+
+        if (!typeSymbol.TypeParameters.IsEmpty)
+        {
+            sb.Append('<');
+            sb.Append(string.Join(", ", typeSymbol.TypeParameters.Select(tp => tp.Name)));
+            sb.Append('>');
+        }
+        sb.AppendLine("{");
+        sb.AppendLine("    public System.Collections.Generic.Dictionary<string, object?> ToDictionary()");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var dict = new System.Collections.Generic.Dictionary<string, object?>();");
+
+        foreach (var prop in props)
+        {
+            sb.AppendLine($"""        dict["{prop.Name}"] = this.{prop.Name};""");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("        return dict;");
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+
+        return sb.ToString();
+    }
+    
+    private static string GenerateExtensionsFor(INamedTypeSymbol typeSymbol)
+    {
+        var ns = typeSymbol.ContainingNamespace.IsGlobalNamespace
+            ? null
+            : typeSymbol.ContainingNamespace.ToDisplayString();
+
+        var fullTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+        var safeTypeName = GetSafeTypeName(typeSymbol);
+
+        var members = GetIncludedMembers(typeSymbol);
+
+        var sb = new StringBuilder();
+
+        if (ns is not null)
+        {
+            sb.Append("namespace ").Append(ns).AppendLine(";");
+            sb.AppendLine();
+        }
+
+        // Static extension class
+        sb.AppendLine("file static class __AutoDictionaryExtensions_" + safeTypeName);
+        sb.AppendLine("{");
+
+        // ToDictionary extension
+        sb.AppendLine($"    public static System.Collections.Generic.IReadOnlyDictionary<string, object?> ToDictionary(this {fullTypeName} instance)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        var dict = new System.Collections.Generic.Dictionary<string, object?>();");
+        sb.AppendLine();
+        sb.AppendLine("        if (instance is null)");
+        sb.AppendLine("        {");
+        sb.AppendLine("            return dict;"); // empty
+        sb.AppendLine("        }");
+        sb.AppendLine();
+
+        foreach (var member in members)
+        {
+            GenerateMemberMapping(sb, typeSymbol, member);
+        }
+
+        sb.AppendLine("        return dict;");
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+
+        return sb.ToString();
+    }
+        private static ImmutableArray<ISymbol> GetIncludedMembers(INamedTypeSymbol typeSymbol)
+    {
+        var ignoreAttributeName = "AutoDictionary.AutoDictionaryIgnoreAttribute";
+
+        var props = typeSymbol.GetMembers()
+            .OfType<IPropertySymbol>()
+            .Where(p =>
+                p.DeclaredAccessibility == Accessibility.Public &&
+                p.GetMethod is not null &&
+                !HasIgnoreAttribute(p, ignoreAttributeName) &&
+                !p.IsStatic);
+
+        var fields = typeSymbol.GetMembers()
+            .OfType<IFieldSymbol>()
+            .Where(f =>
+                f.DeclaredAccessibility == Accessibility.Public &&
+                !f.IsStatic &&
+                !f.IsConst &&
+                !HasIgnoreAttribute(f, ignoreAttributeName));
+
+        return props.Cast<ISymbol>()
+            .Concat(fields)
+            .ToImmutableArray();
+    }
+
+    private static bool HasIgnoreAttribute(ISymbol symbol, string fullAttributeName)
+    {
+        return symbol.GetAttributes()
+            .Any(a => a.AttributeClass?.ToDisplayString() == fullAttributeName);
+    }
+
+    private static void GenerateMemberMapping(
+        StringBuilder sb,
+        INamedTypeSymbol containingType,
+        ISymbol member)
+    {
+        var memberName = member.Name;
+        var memberAccess = "instance." + memberName;
+        ITypeSymbol memberType;
+
+        if (member is IPropertySymbol prop)
+        {
+            memberType = prop.Type;
+        }
+        else if (member is IFieldSymbol field)
+        {
+            memberType = field.Type;
+        }
+        else
+        {
+            return;
+        }
+
+        var isNullable = memberType.NullableAnnotation == NullableAnnotation.Annotated;
+
+        // Check if member type itself is decorated with [AutoDictionary]
+        var isAutoDictionaryType = IsAutoDictionaryType(memberType);
+
+        if (isAutoDictionaryType)
+        {
+            // Nested flattening
+            sb.AppendLine($"        if ({memberAccess} is not null)");
+            sb.AppendLine("        {");
+            sb.AppendLine($"            foreach (var kvp in {memberAccess}.ToDictionary())");
+            sb.AppendLine("            {");
+            sb.AppendLine($"                dict[$\"{memberName}.{{kvp.Key}}\"] = kvp.Value;");
+            sb.AppendLine("            }");
+            sb.AppendLine("        }");
+            sb.AppendLine();
+        }
+        else
+        {
+            // Simple store
+            if (isNullable || memberType.IsReferenceType)
+            {
+                sb.AppendLine($"        dict[\"{memberName}\"] = {memberAccess};");
+                sb.AppendLine();
+            }
+            else
+            {
+                // Value type, non-nullable
+                sb.AppendLine($"        dict[\"{memberName}\"] = {memberAccess};");
+                sb.AppendLine();
+            }
+        }
+    }
+
+    private static bool IsAutoDictionaryType(ITypeSymbol typeSymbol)
+    {
+        // Unwrap Nullable<T> if present
+        if (typeSymbol is INamedTypeSymbol named &&
+            named.IsGenericType &&
+            named.ConstructedFrom.SpecialType == SpecialType.System_Nullable_T)
+        {
+            typeSymbol = named.TypeArguments[0];
+        }
+
+        if (typeSymbol is not INamedTypeSymbol nts)
+            return false;
+
+        return nts.GetAttributes()
+            .Any(a => a.AttributeClass?.ToDisplayString() == "AutoDictionary.AutoDictionaryAttribute");
+    }
+
     private static void GenerateDictionaryForType(SourceProductionContext context, INamedTypeSymbol typeSymbol)
     {
         //var attributeData = typeSymbol.GetAttributes().First(a =>
@@ -124,7 +380,19 @@ public sealed partial class DictionaryGenerator : IIncrementalGenerator
             );
         }
     }
+    private static string GetSafeTypeName(INamedTypeSymbol typeSymbol)
+    {
+        // Turn things like Namespace.Outer+Inner<T> into a file-safe name
+        var name = typeSymbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
+        var builder = new StringBuilder(name.Length);
 
+        foreach (var ch in name)
+        {
+            builder.Append(char.IsLetterOrDigit(ch) ? ch : '_');
+        }
+
+        return builder.ToString();
+    }
 }
 
 public sealed partial class DictionaryGenerator
