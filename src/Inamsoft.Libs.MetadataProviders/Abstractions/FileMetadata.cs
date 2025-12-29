@@ -5,6 +5,7 @@ namespace Inamsoft.Libs.MetadataProviders.Abstractions;
 
 //[AutoDictionary()]
 [GenerateDictionary()]
+[GenerateConstantsFromProps()]
 public partial record FileMetadata
 {
     public string FilePath { get; set; } = string.Empty;

@@ -29,17 +29,17 @@ public abstract class BaseMetadataProvider<TMetadataProvider>
             DirectoryPath = Path.GetDirectoryName(filePath) ?? string.Empty,
         };
 
-        if (File.Exists(filePath))
-        {
-            var fi = new FileInfo(filePath);
+        if (!File.Exists(filePath)) 
+            return metadata;
+        
+        var fi = new FileInfo(filePath);
 
-            metadata.DirectoryName = fi.Directory?.Name ?? string.Empty;
+        metadata.DirectoryName = fi.Directory?.Name ?? string.Empty;
 
-            metadata.CreatedAt = fi.CreationTime;
-            metadata.ModifiedAt = fi.LastWriteTime;
+        metadata.CreatedAt = fi.CreationTime;
+        metadata.ModifiedAt = fi.LastWriteTime;
 
-            metadata.Length = fi.Length;
-        }
+        metadata.Length = fi.Length;
         return metadata;
     }
 }
