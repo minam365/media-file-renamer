@@ -17,16 +17,17 @@ using Directory = MetadataExtractor.Directory;
 namespace Inamsoft.Libs.MetadataProviders.Tests;
 
 [TestSubject(typeof(PhotoFileMetadataProvider))]
-public class PhotoFileMetadataProviderTest
+public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixture>
 {
+    private readonly MetadataProviderFixture _fixture;
+    private readonly ITestContextAccessor _contextAccessor;
     private PhotoFileMetadataProvider _provider;
     private ILogger<PhotoFileMetadataProvider> _logger;
 
-    [OneTimeSetup]
-    public void SetUp()
+    public PhotoFileMetadataProviderTest(MetadataProviderFixture fixture, ITestContextAccessor contextAccessor)
     {
-        _logger = Substitute.For<ILogger<PhotoFileMetadataProvider>>();
-        _provider = new PhotoFileMetadataProvider(_logger);
+        _fixture = fixture;
+        _contextAccessor = contextAccessor;
     }
 
     [Fact()]
@@ -34,12 +35,12 @@ public class PhotoFileMetadataProviderTest
     {
         // Arrange
         var fileName = "nonexistent.jpg";
+        var metadataProvider = _fixture.PhotoFileMetadataProvider;
 
         // Act
-        var result = _provider.GetMetadata(fileName);
+        var result = metadataProvider.GetMetadata(fileName);
 
         // Assert
-        Assert.;
         Assert.NotNull(result);
         Assert.NotNull(result.FileMetadata);
         Assert.Equal(fileName, result.FileMetadata.FilePath);

@@ -14,6 +14,9 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
     public PhotoFileMetadata GetMetadata(string fileName)
     {
         var fileMetadata = GetFileMetadata(fileName);
+        if (!fileMetadata.Exists) 
+            throw new FileNotFoundException("File not found", fileName);
+        
         var photoMetadata = new PhotoFileMetadata()
         {
             FileMetadata = fileMetadata

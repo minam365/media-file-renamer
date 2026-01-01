@@ -11,7 +11,7 @@ namespace Inamsoft.Libs.MetadataProviders
     /// the base functionality for metadata retrieval and implements <see cref="IMetadataProvider{TMetadata}"/>
     /// to provide specific metadata processing for files using the <see cref="FileMetadata"/> container.
     /// </remarks>
-    public class FileMetadataProvider : BaseMetadataProvider<FileMetadataProvider>, IMetadataProvider<FileMetadata>
+    public class FileMetadataProvider : BaseMetadataProvider<FileMetadataProvider>, IFileMetadataProvider
     {
         /// <summary>
         /// Represents a provider for retrieving metadata of files based on their paths or names.

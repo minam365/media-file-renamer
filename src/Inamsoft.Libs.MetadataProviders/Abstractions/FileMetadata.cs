@@ -6,7 +6,7 @@ namespace Inamsoft.Libs.MetadataProviders.Abstractions;
 //[AutoDictionary()]
 [GenerateDictionary()]
 [GenerateConstantsFromProps()]
-public partial record FileMetadata
+public partial record FileMetadata(FileInfo FileInfo)
 {
     public string FilePath { get; set; } = string.Empty;
     public string FileName { get; init; } = string.Empty;
@@ -14,6 +14,7 @@ public partial record FileMetadata
     public string FileExtension { get; set; } = string.Empty;
     public string DirectoryName { get; set; } = string.Empty;
     public string DirectoryPath { get; set; } = string.Empty;
+    public bool Exists { get; set; }
     public long Length { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime ModifiedAt { get; set; }

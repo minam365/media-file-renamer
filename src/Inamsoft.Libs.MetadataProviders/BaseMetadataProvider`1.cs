@@ -20,26 +20,27 @@ public abstract class BaseMetadataProvider<TMetadataProvider>
 
         Guard.IsNotNullOrWhiteSpace(filePath, nameof(filePath));
 
-        var metadata = new FileMetadata
+        FileInfo fileInfo = new(filePath);
+        var metadata = new FileMetadata(fileInfo)
         {
-            FilePath = filePath,
-            FileName = Path.GetFileName(filePath),
+            FilePath = fileInfo.FullName,
+            FileName = fileInfo.Name,
             FileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath),
-            FileExtension = Path.GetExtension(filePath),
-            DirectoryPath = Path.GetDirectoryName(filePath) ?? string.Empty,
+            FileExtension = fileInfo.Extension,
+            DirectoryPath = fileInfo.DirectoryName ?? string.Empty,    
+            Exists = fileInfo.Exists
         };
 
-        if (!File.Exists(filePath)) 
+        if (!fileInfo.Exists) 
             return metadata;
+
+        metadata.DirectoryName = fileInfo.DirectoryName ?? string.Empty;
+
+        metadata.CreatedAt = fileInfo.CreationTime;
+        metadata.ModifiedAt = fileInfo.LastWriteTime;
+
+        metadata.Length = fileInfo.Length;
         
-        var fi = new FileInfo(filePath);
-
-        metadata.DirectoryName = fi.Directory?.Name ?? string.Empty;
-
-        metadata.CreatedAt = fi.CreationTime;
-        metadata.ModifiedAt = fi.LastWriteTime;
-
-        metadata.Length = fi.Length;
         return metadata;
     }
 }
