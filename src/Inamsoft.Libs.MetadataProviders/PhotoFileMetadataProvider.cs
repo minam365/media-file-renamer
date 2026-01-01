@@ -7,7 +7,7 @@ namespace Inamsoft.Libs.MetadataProviders;
 
 public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataProvider>, IPhotoFileMetadataProvider
 {
-    public PhotoFileMetadataProvider(ILogger<PhotoFileMetadataProvider> logger) : base(logger)
+    public PhotoFileMetadataProvider(IFileMetadataProvider fileMetadataProvider, ILogger<PhotoFileMetadataProvider> logger) : base(logger)
     {
     }
 

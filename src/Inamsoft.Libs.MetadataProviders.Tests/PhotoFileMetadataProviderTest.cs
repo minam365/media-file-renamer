@@ -43,10 +43,10 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         // Assert
         Assert.NotNull(result);
         Assert.NotNull(result.FileMetadata);
-        Assert.Equal(fileName, result.FileMetadata.FilePath);
-        Assert.Equal(Path.GetFileName(fileName), result.FileMetadata.FileName);
-        Assert.Equal(Path.GetFileNameWithoutExtension(fileName), result.FileMetadata.FileNameWithoutExtension);
-        Assert.Equal(Path.GetExtension(fileName), result.FileMetadata.FileExtension);
+        Assert.Equal(fileName, result.FileMetadata.Path);
+        Assert.Equal(Path.GetFileName(fileName), result.FileMetadata.Name);
+        Assert.Equal(Path.GetFileNameWithoutExtension(fileName), result.FileMetadata.NameWithoutExtension);
+        Assert.Equal(Path.GetExtension(fileName), result.FileMetadata.Extension);
         Assert.Equal(string.Empty, result.FileMetadata.DirectoryPath);
         Assert.Equal(string.Empty, result.FileMetadata.DirectoryName);
     }
@@ -64,10 +64,10 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         // Assert
         Assert.NotNull(result);
         Assert.NotNull(result.FileMetadata);
-        Assert.Equal(fileName, result.FileMetadata.FilePath);
-        Assert.Equal(Path.GetFileName(fileName), result.FileMetadata.FileName);
-        Assert.Equal(Path.GetFileNameWithoutExtension(fileName), result.FileMetadata.FileNameWithoutExtension);
-        Assert.Equal(Path.GetExtension(fileName), result.FileMetadata.FileExtension);
+        Assert.Equal(fileName, result.FileMetadata.Path);
+        Assert.Equal(Path.GetFileName(fileName), result.FileMetadata.Name);
+        Assert.Equal(Path.GetFileNameWithoutExtension(fileName), result.FileMetadata.NameWithoutExtension);
+        Assert.Equal(Path.GetExtension(fileName), result.FileMetadata.Extension);
         Assert.Equal(fileInfo.DirectoryName, result.FileMetadata.DirectoryPath);
         Assert.Equal(fileInfo.Directory?.Name ?? string.Empty, result.FileMetadata.DirectoryName);
         Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);

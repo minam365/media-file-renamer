@@ -14,33 +14,35 @@ public abstract class BaseMetadataProvider<TMetadataProvider>
     }
 
 
-    protected virtual FileMetadata GetFileMetadata(string filePath)
+    protected IReadOnlyDictionary<string, IReadOnlyList<MetadataTag>> ReadMetadataTagsAsDirectoryDictionary(string filePath)
     {
-        Logger.LogInformation("Getting info for file: {FilePath}", filePath);
+        Dictionary<string, IReadOnlyList<MetadataTag>> metadataDict = [];
 
-        Guard.IsNotNullOrWhiteSpace(filePath, nameof(filePath));
-
-        FileInfo fileInfo = new(filePath);
-        var metadata = new FileMetadata(fileInfo)
+        try
         {
-            FilePath = fileInfo.FullName,
-            FileName = fileInfo.Name,
-            FileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath),
-            FileExtension = fileInfo.Extension,
-            DirectoryPath = fileInfo.DirectoryName ?? string.Empty,    
-            Exists = fileInfo.Exists
-        };
+            var directories = MetadataExtractor.ImageMetadataReader.ReadMetadata(filePath);
+            metadataDict = directories
+                .SelectMany(d => d.Tags.Select(t => new MetadataTag
+                {
+                    Type = t.Type,
+                    Name = t.Name,
+                    Value = t.Description,
+                    DirectoryName = d.Name
+                }))
+                .GroupBy(tag => tag.DirectoryName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => (IReadOnlyList<MetadataTag>)g.ToList()
+                );
+        }
+        catch (Exception)
+        {
 
-        if (!fileInfo.Exists) 
-            return metadata;
+            throw;
+        }
 
-        metadata.DirectoryName = fileInfo.DirectoryName ?? string.Empty;
-
-        metadata.CreatedAt = fileInfo.CreationTime;
-        metadata.ModifiedAt = fileInfo.LastWriteTime;
-
-        metadata.Length = fileInfo.Length;
-        
-        return metadata;
+        return metadataDict;
     }
+
+
 }

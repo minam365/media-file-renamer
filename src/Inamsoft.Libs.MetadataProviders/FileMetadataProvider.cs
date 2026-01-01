@@ -1,4 +1,5 @@
-﻿using Inamsoft.Libs.MetadataProviders.Abstractions;
+﻿using CommunityToolkit.Diagnostics;
+using Inamsoft.Libs.MetadataProviders.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace Inamsoft.Libs.MetadataProviders;
@@ -27,8 +28,44 @@ public class FileMetadataProvider : BaseMetadataProvider<FileMetadataProvider>, 
     {
     }
 
-    public FileMetadata GetMetadata(string fileName)
+    /// <summary>
+    /// Retrieves metadata information for the specified file, including its path, name, extension, directory,
+    /// existence, timestamps, and size.
+    /// </summary>
+    /// <param name="filePath">The name or path of the file for which to retrieve metadata. Cannot be null, empty, or consist only of
+    /// white-space characters.</param>
+    /// <returns>A <see cref="FileMetadata"/> instance containing metadata about the specified file. If the file does not exist,
+    /// the returned object will indicate <see langword="false"/> for <c>Exists</c> and default values for other
+    /// properties.</returns>
+    public FileMetadata GetMetadata(string filePath)
     {
-        return GetFileMetadata(fileName);
+        Logger.LogDebug("Getting metadata info from the file: {Path}", filePath);
+
+        Guard.IsNotNullOrWhiteSpace(filePath, nameof(filePath));
+
+        FileInfo fileInfo = new(filePath);
+        var metadata = new FileMetadata(fileInfo)
+        {
+            Path = fileInfo.FullName,
+            Name = fileInfo.Name,
+            NameWithoutExtension = Path.GetFileNameWithoutExtension(filePath),
+            Extension = fileInfo.Extension,
+            DirectoryPath = fileInfo.DirectoryName ?? string.Empty,
+            Exists = fileInfo.Exists
+        };
+
+        if (!fileInfo.Exists)
+            return metadata;
+
+        metadata.DirectoryName = fileInfo.DirectoryName ?? string.Empty;
+
+        metadata.CreatedAt = fileInfo.CreationTime;
+        metadata.ModifiedAt = fileInfo.LastWriteTime;
+
+        metadata.Length = fileInfo.Length;
+
+        Logger.LogDebug("Metadata info retrieved successfully from the file: {Path}", filePath);
+
+        return metadata;
     }
 }
