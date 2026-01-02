@@ -50,19 +50,16 @@ public class FileMetadataProvider : BaseMetadataProvider<FileMetadataProvider>, 
             Name = fileInfo.Name,
             NameWithoutExtension = Path.GetFileNameWithoutExtension(filePath),
             Extension = fileInfo.Extension,
-            DirectoryPath = fileInfo.DirectoryName ?? string.Empty,
+            DirectoryName = fileInfo.DirectoryName ?? string.Empty,
             Exists = fileInfo.Exists
         };
 
-        if (!fileInfo.Exists)
-            return metadata;
-
-        metadata.DirectoryName = fileInfo.DirectoryName ?? string.Empty;
-
-        metadata.CreatedAt = fileInfo.CreationTime;
-        metadata.ModifiedAt = fileInfo.LastWriteTime;
-
-        metadata.Length = fileInfo.Length;
+        if (fileInfo.Exists)
+        {
+            metadata.CreatedAt = fileInfo.CreationTime;
+            metadata.ModifiedAt = fileInfo.LastWriteTime;
+            metadata.Length = fileInfo.Length;
+        }
 
         Logger.LogDebug("Metadata info retrieved successfully from the file: {Path}", filePath);
 

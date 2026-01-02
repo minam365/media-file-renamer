@@ -19,7 +19,6 @@ public partial record FileMetadata(FileInfo FileInfo)
     public string NameWithoutExtension { get; set; } = string.Empty;
     public string Extension { get; set; } = string.Empty;
     public string DirectoryName { get; set; } = string.Empty;
-    public string DirectoryPath { get; set; } = string.Empty;
     public bool Exists { get; set; }
     public long Length { get; set; }
     public DateTime CreatedAt { get; set; }
