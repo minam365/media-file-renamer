@@ -412,3 +412,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Media Files Assets 
+assets/media-files/*
