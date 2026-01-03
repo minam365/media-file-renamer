@@ -100,7 +100,7 @@ internal class MediaFileHelper
                             File.Copy(mediaFile.FullName, targetFilePath, overwrite);
                             succeededCount++;
 
-                            AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Copied  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.FullName} [green]to[/] {targetFilePath}");
+                            AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Copied  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [green]to[/] {targetFilePath}");
                         }
                         catch (Exception ex)
                         {
@@ -176,7 +176,7 @@ internal class MediaFileHelper
                             }
                             File.Move(mediaFile.FullName, targetFilePath);
                             succeededCount++;
-                            AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Moved  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.FullName} [green]to[/] {targetFilePath}");
+                            AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Moved  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [green]to[/] {targetFilePath}");
                         }
                         catch (Exception ex)
                         {
