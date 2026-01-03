@@ -41,7 +41,7 @@ internal class MediaFileHelper
 
     }
 
-    public FileActionResult RichCopyFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool makeUniqueNames = true)
+    public FileActionResult RichCopyFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool overwrite = false, bool recursive = false)
     {
 
         int succeededCount = 0;
@@ -52,7 +52,9 @@ internal class MediaFileHelper
             AnsiConsole.MarkupLineInterpolated($"[red]✗ Source folder does not exist: {sourceFolderPath}[/]");
             throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
         }
-        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, SearchOption.TopDirectoryOnly);
+        SearchOption searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, searchOption);
+
         AnsiConsole.Progress()
             .AutoClear(false)
             .HideCompleted(false)
@@ -73,7 +75,7 @@ internal class MediaFileHelper
                 new ElapsedTimeColumn(),        // Elapsed time
                 new RemainingTimeColumn(),      // Remaining time
             })
-            .Start(ctx =>
+            .Start((Action<ProgressContext>)(ctx =>
             {
                 var copyTask = ctx.AddTask("Copying files...", maxValue: mediaFiles.Length);
 
@@ -87,16 +89,15 @@ internal class MediaFileHelper
                             AnsiConsole.WriteLine();
                             AnsiConsole.MarkupLineInterpolated($"[dim yellow]→ Copying {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [dim yellow]to[/] {targetFolderPath}");
 
-                            string targetFilePath = makeUniqueNames
-                                ? FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath)
-                                : FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath);
+                            string targetFilePath = overwrite
+                                ? FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath)
+                                : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath);
                             var targetDirectory = Path.GetDirectoryName(targetFilePath);
                             if (!Directory.Exists(targetDirectory))
                             {
                                 Directory.CreateDirectory(targetDirectory!);
                             }
 
-                            var overwrite = makeUniqueNames ? false : true;
                             File.Copy(mediaFile.FullName, targetFilePath, overwrite);
                             succeededCount++;
 
@@ -112,7 +113,7 @@ internal class MediaFileHelper
                         fileCounter++;
                     }
                 }
-            });
+            }));
 
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLineInterpolated($"[yellow]Completed copying files[/]. [green]✓ Succeeded:[/] {succeededCount}, [red]✗ Failed:[/] {failedCount}");
@@ -121,7 +122,7 @@ internal class MediaFileHelper
         return new FileActionResult(succeededCount, failedCount);
     }
 
-    public FileActionResult RichMoveFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool makeUniqueNames = true)
+    public FileActionResult RichMoveFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool overwrite = false, bool recursive = false)
     {
         int succeededCount = 0;
         int failedCount = 0;
@@ -130,7 +131,10 @@ internal class MediaFileHelper
         {
             throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
         }
-        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, SearchOption.TopDirectoryOnly);
+
+        SearchOption searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, searchOption);
+
         AnsiConsole.Progress()
             .AutoClear(false)
             .HideCompleted(false)
@@ -166,15 +170,15 @@ internal class MediaFileHelper
                             AnsiConsole.WriteLine();
                             AnsiConsole.MarkupLineInterpolated($"[dim yellow]→ Moving {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [dim yellow]to[/] {targetFolderPath}");
 
-                            string targetFilePath = makeUniqueNames
-                    ? FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath)
-                    : FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath);
+                            string targetFilePath = overwrite
+                                ? FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath)
+                                : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath);
                             var targetDirectory = Path.GetDirectoryName(targetFilePath);
                             if (!Directory.Exists(targetDirectory))
                             {
                                 Directory.CreateDirectory(targetDirectory!);
                             }
-                            File.Move(mediaFile.FullName, targetFilePath);
+                            File.Move(mediaFile.FullName, targetFilePath, overwrite);
                             succeededCount++;
                             AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Moved  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [green]to[/] {targetFilePath}");
                         }

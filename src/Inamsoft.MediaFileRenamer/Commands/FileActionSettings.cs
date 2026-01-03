@@ -18,9 +18,14 @@ internal class FileActionSettings : CommandSettings
     [DefaultValue("*.*")]
     public string SourceFilePattern { get; set; } = "*.*";
 
-    [CommandOption("-u|--make-unique-names")]
-    [Description("If set to true, ensures that copied files have unique names in the target folder to avoid overwriting.")]
-    [DefaultValue(true)]
-    public bool MakeUniqueNames { get; set; } = true;
+    [CommandOption("-o|--overwrite")]
+    [Description("If set to false, ensures that copied/moved files have unique names in the target folder to avoid overwriting.")]
+    [DefaultValue(false)]
+    public bool Overwrite { get; set; } = false;
+
+    [CommandOption("-r|--recursive")]
+    [Description("If set to true, processes files in all subdirectories of the source folder recursively.")]
+    [DefaultValue(false)]
+    public bool Recursive { get; set; } = false;
 
 }

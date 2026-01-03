@@ -14,7 +14,8 @@ internal class MoveFilesCommand : Command<FileActionSettings>
                 settings.SourceFolderPath,
                 settings.TargetFolderPath,
                 settings.SourceFilePattern,
-                settings.MakeUniqueNames);
+                settings.Overwrite,
+                settings.Recursive);
 
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();
