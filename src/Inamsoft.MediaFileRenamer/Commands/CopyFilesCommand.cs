@@ -15,12 +15,16 @@ internal class CopyFilesCommand : Command<FileActionSettings>
                 settings.TargetFolderPath,
                 settings.SourceFilePattern,
                 settings.MakeUniqueNames);
-            AnsiConsole.MarkupLineInterpolated($"[green]✔ Completed copying files. Succeeded: {result.SucceededCount}, Failed: {result.FailedCount}[/]");
+
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine();
+
             return 0;
         }
         catch (Exception ex)
         {
             AnsiConsole.MarkupLineInterpolated($"[red]✗ Error occurred while copying files: {ex.Message}[/]");
+            AnsiConsole.WriteLine();
             return -1;
         }
     }

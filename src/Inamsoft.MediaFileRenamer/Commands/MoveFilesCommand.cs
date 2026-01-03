@@ -10,17 +10,21 @@ internal class MoveFilesCommand : Command<FileActionSettings>
         var mediaFileHelper = new MediaFileHelper();
         try
         {
-            var result = mediaFileHelper.RichCopyFiles(
+            var result = mediaFileHelper.RichMoveFiles(
                 settings.SourceFolderPath,
                 settings.TargetFolderPath,
                 settings.SourceFilePattern,
                 settings.MakeUniqueNames);
-            AnsiConsole.MarkupLineInterpolated($"[green]✔ Completed moving files. Succeeded: {result.SucceededCount}, Failed: {result.FailedCount}[/]");
+
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine();
+
             return 0;
         }
         catch (Exception ex)
         {
             AnsiConsole.MarkupLineInterpolated($"[red]✗ Error occurred while moving files: {ex.Message}[/]");
+            AnsiConsole.WriteLine();
             return -1;
         }
     }

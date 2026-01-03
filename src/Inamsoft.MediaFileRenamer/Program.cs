@@ -25,10 +25,21 @@ var targetFolderPath = args.Length > 2 ? args[2] : @"J:\-RENAMED-\Emin's Camera"
 //AnsiConsole.MarkupLine($"[green]File copy operation completed.[/]");
 //AnsiConsole.WriteLine();
 
+const string appName = "Inamsoft Media File Renamer";
+
+var figletText= new FigletText(appName)
+    .Centered()
+    .Color(Color.Green);
+AnsiConsole.Write(figletText);
+AnsiConsole.WriteLine();
+AnsiConsole.Write(new Rule().RuleStyle("grey").Centered());
+AnsiConsole.WriteLine();
+
+
 var app = new CommandApp();
 app.Configure(config =>
 {
-    config.SetApplicationName("Inamsoft Media File Renamer");
+    config.SetApplicationName(appName);
     config.AddCommand<CopyFilesCommand>("copy")
         .WithDescription("Copies media files from the source folder to the target folder with options for file patterns and unique naming.");
     config.AddCommand<MoveFilesCommand>("move")

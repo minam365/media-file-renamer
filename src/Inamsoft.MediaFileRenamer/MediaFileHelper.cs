@@ -58,13 +58,17 @@ internal class MediaFileHelper
             .HideCompleted(false)
             .Columns(new ProgressColumn[]
             {
-                new SpinnerColumn(),            // Spinner
+                new SpinnerColumn               // Spinner
+                {
+                    Spinner = Spinner.Known.Default
+                },
                 new TaskDescriptionColumn(),    // Task description
-                new ProgressBarColumn{
-            CompletedStyle = new Style(Color.Green),
-            FinishedStyle = new Style(Color.Lime),
-            RemainingStyle = new Style(Color.Grey)
-        },        // Progress bar
+                new ProgressBarColumn           // Progress bar
+                {
+                    CompletedStyle = new Style(Color.Green),
+                    FinishedStyle = new Style(Color.Lime),
+                    RemainingStyle = new Style(Color.Grey)
+                },
                 new PercentageColumn(),         // Percentage
                 new ElapsedTimeColumn(),        // Elapsed time
                 new RemainingTimeColumn(),      // Remaining time
@@ -81,7 +85,7 @@ internal class MediaFileHelper
                         try
                         {
                             AnsiConsole.WriteLine();
-                            AnsiConsole.MarkupLineInterpolated($"[yellow]→ Copying {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [yellow]to[/] {targetFolderPath}");
+                            AnsiConsole.MarkupLineInterpolated($"[dim yellow]→ Copying {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [dim yellow]to[/] {targetFolderPath}");
 
                             string targetFilePath = makeUniqueNames
                                 ? FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath)
@@ -91,10 +95,12 @@ internal class MediaFileHelper
                             {
                                 Directory.CreateDirectory(targetDirectory!);
                             }
-                            File.Copy(mediaFile.FullName, targetFilePath);
+
+                            var overwrite = makeUniqueNames ? false : true;
+                            File.Copy(mediaFile.FullName, targetFilePath, overwrite);
                             succeededCount++;
 
-                            AnsiConsole.MarkupLineInterpolated($"[green]✓ Copied {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.FullName} [green]to[/] {targetFilePath}");
+                            AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Copied  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.FullName} [green]to[/] {targetFilePath}");
                         }
                         catch (Exception ex)
                         {
@@ -107,34 +113,90 @@ internal class MediaFileHelper
                     }
                 }
             });
-        //foreach (var mediaFile in mediaFiles)
-        //{
-        //    try
-        //    {
-        //        string targetFilePath = makeUniqueNames
-        //            ? FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath)
-        //            : FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath);
-        //        var targetDirectory = Path.GetDirectoryName(targetFilePath);
-        //        if (!Directory.Exists(targetDirectory))
-        //        {
-        //            Directory.CreateDirectory(targetDirectory!);
-        //        }
-        //        File.Copy(mediaFile.FullName, targetFilePath);
-        //        succeededCount++;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        AnsiConsole.WriteException(ex);
-        //        failedCount++;
-        //    }
-        //}
 
         AnsiConsole.WriteLine();
-        AnsiConsole.MarkupLineInterpolated($"[yellow]Completed copying files[/]. [green]✓ Succeeded:[/] {succeededCount} [red]✗ Failed:[/] {failedCount}");
+        AnsiConsole.MarkupLineInterpolated($"[yellow]Completed copying files[/]. [green]✓ Succeeded:[/] {succeededCount}, [red]✗ Failed:[/] {failedCount}");
         AnsiConsole.WriteLine();
 
         return new FileActionResult(succeededCount, failedCount);
     }
+
+    public FileActionResult RichMoveFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool makeUniqueNames = true)
+    {
+        int succeededCount = 0;
+        int failedCount = 0;
+        var sourceDirectoryInfo = new DirectoryInfo(sourceFolderPath);
+        if (!sourceDirectoryInfo.Exists)
+        {
+            throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
+        }
+        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, SearchOption.TopDirectoryOnly);
+        AnsiConsole.Progress()
+            .AutoClear(false)
+            .HideCompleted(false)
+            .Columns(new ProgressColumn[]
+            {
+                        new SpinnerColumn               // Spinner
+                        {
+                            Spinner = Spinner.Known.Default
+                        },
+                        new TaskDescriptionColumn(),    // Task description
+                        new ProgressBarColumn           // Progress bar
+                        {
+                            CompletedStyle = new Style(Color.Green),
+                            FinishedStyle = new Style(Color.Lime),
+                            RemainingStyle = new Style(Color.Grey)
+                        },
+                        new PercentageColumn(),         // Percentage
+                        new ElapsedTimeColumn(),        // Elapsed time
+                        new RemainingTimeColumn(),      // Remaining time
+            })
+            .Start(ctx =>
+            {
+                var copyTask = ctx.AddTask("Moving files...", maxValue: mediaFiles.Length);
+
+                while (!copyTask.IsFinished)
+                {
+                    var fileCounter = 1;
+
+                    foreach (var mediaFile in mediaFiles)
+                    {
+                        try
+                        {
+                            AnsiConsole.WriteLine();
+                            AnsiConsole.MarkupLineInterpolated($"[dim yellow]→ Moving {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [dim yellow]to[/] {targetFolderPath}");
+
+                            string targetFilePath = makeUniqueNames
+                    ? FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath)
+                    : FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath);
+                            var targetDirectory = Path.GetDirectoryName(targetFilePath);
+                            if (!Directory.Exists(targetDirectory))
+                            {
+                                Directory.CreateDirectory(targetDirectory!);
+                            }
+                            File.Move(mediaFile.FullName, targetFilePath);
+                            succeededCount++;
+                            AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Moved  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.FullName} [green]to[/] {targetFilePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            //AnsiConsole.WriteException(ex);
+                            AnsiConsole.MarkupLineInterpolated($"[red]✗ Failed to move {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [yellow]to[/] {targetFolderPath}. [red]Error:[/] {ex.Message}");
+                            failedCount++;
+                        }
+                        copyTask.Increment(1);
+                        fileCounter++;
+                    }
+                }
+            });
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"[yellow]Completed moving files[/]. [green]✓ Succeeded:[/] {succeededCount}, [red]✗ Failed:[/] {failedCount}");
+        AnsiConsole.WriteLine();
+
+        return new FileActionResult(succeededCount, failedCount);
+    }
+
 
 
     public FileActionResult CopyFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool makeUniqueNames = true)
@@ -196,7 +258,7 @@ internal class MediaFileHelper
                 File.Move(mediaFile.FullName, targetFilePath);
                 succeededCount++;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 AnsiConsole.WriteException(ex);
                 failedCount++;
