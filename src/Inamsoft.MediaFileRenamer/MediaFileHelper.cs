@@ -251,8 +251,9 @@ internal class MediaFileHelper
         }
         var searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
         var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, searchOption)
-            .OrderBy(fi => fi.DirectoryName)
-            .ToArray();
+                                            .Where(fi => fi.Exists && Inamsoft.Libs.MediaFileRenaming.FileNamingService.IsSupportedMediaFileExtension(fi.Extension))
+                                            .OrderBy(fi => fi.DirectoryName)
+                                            .ToArray();
         return mediaFiles;
     }
 

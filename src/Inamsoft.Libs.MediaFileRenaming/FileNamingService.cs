@@ -47,6 +47,20 @@ public class FileNamingService : IFileNamingService
         _fileMetadataProvider = fileMetadataProvider;
     }
 
+    public static bool IsSupportedPhotoFileExtension(string fileExtension)
+    {
+        return _supportedPhotoFileExtensions.Contains(fileExtension);
+    }
+
+    public static bool IsSupportedVideoFileExtension(string fileExtension)
+    {
+        return _supportedVideoFileExtensions.Contains(fileExtension);
+    }
+
+    public static bool IsSupportedMediaFileExtension(string fileExtension)
+    {
+        return IsSupportedPhotoFileExtension(fileExtension) || IsSupportedVideoFileExtension(fileExtension);
+    }
 
     public string GetTargetFilePath(string sourceFilePath, string targetFolderPath)
     {
