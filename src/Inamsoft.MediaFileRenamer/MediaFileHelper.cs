@@ -7,6 +7,7 @@ using Spectre.Console;
 
 namespace Inamsoft.MediaFileRenamer;
 
+
 internal class MediaFileHelper
 {
     private readonly IServiceProvider _serviceProvider;
