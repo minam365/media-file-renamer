@@ -34,6 +34,24 @@ namespace Inamsoft.Libs.MediaFileRenaming.Tests
         }
 
         [Fact]
+        public void GetTargetFilePath_FileExists_ReturnsExpectedFilePath_Rw2()
+        {
+            // Arrange
+            var filePath = @"..\..\..\..\..\assets\media-files\P1080216.RW2";
+            var canonicalFilePath = Path.GetFullPath(filePath);
+            var fileInfo = new FileInfo(filePath);
+            var tempFolderPath = Path.GetTempPath();
+            var expectedTargetFilePath = Path.Combine(tempFolderPath, "2016", "02. February", "20160207_182646_(Panasonic DMC-FZ45)_(4396x2454)_P1080216.RW2");
+
+            // Act
+            var result = FileNamingService.GetTargetFilePath(canonicalFilePath, tempFolderPath);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(expectedTargetFilePath, result);
+        }
+
+        [Fact]
         public void MakeUniqueTargetFilePath_FileExists_ReturnsExpectedFilePath_iPhone13()
         {
             // Arrange

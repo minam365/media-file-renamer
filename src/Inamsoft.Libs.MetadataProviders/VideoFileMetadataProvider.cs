@@ -26,9 +26,17 @@ public class VideoFileMetadataProvider : BaseMetadataProvider<VideoFileMetadataP
         if (!fileMetadata.Exists)
             return videoFileMetadata;
 
-        var directories = ImageMetadataReader.ReadMetadata(filePath);
-        var dirToTagsMap = directories.ToTagDictionary();
-        var tagList = directories.ToTagList();
+        if (!TryReadMetadata(filePath, out GetMetadataResult getMetadataResult))
+        {
+            videoFileMetadata.CreatedAt = fileMetadata.CreatedAt;
+            videoFileMetadata.ModifiedAt = fileMetadata.ModifiedAt;
+
+            return videoFileMetadata;
+        }
+
+        var directories = getMetadataResult.Directories!;
+        var dirToTagsMap = getMetadataResult.DirectoryToTagsMap;
+        var tagList = getMetadataResult.MetadataTags;
 
         (DateTime? CreatedAt, DateTime? ModifiedAt) timestamps = GetTimestamps(tagList);
         videoFileMetadata.CreatedAt = timestamps.CreatedAt;

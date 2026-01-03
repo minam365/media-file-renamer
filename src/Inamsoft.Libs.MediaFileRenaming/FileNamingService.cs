@@ -10,7 +10,7 @@ public class FileNamingService : IFileNamingService
 
     private readonly IPhotoFileMetadataProvider _photoFileMetadataProvider;
     private readonly IVideoFileMetadataProvider _videoFileMetadataProvider;
-
+    private readonly IFileMetadataProvider _fileMetadataProvider;
     private static readonly HashSet<string> _supportedPhotoFileExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         ".jpg",
@@ -24,6 +24,7 @@ public class FileNamingService : IFileNamingService
         ".dng",
         ".raw",
         ".cr2",
+        ".rw2",
     };
 
     private static readonly HashSet<string> _supportedVideoFileExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -39,10 +40,11 @@ public class FileNamingService : IFileNamingService
         ".m2ts"
     };
 
-    public FileNamingService(IPhotoFileMetadataProvider photoFileMetadataProvider, IVideoFileMetadataProvider videoFileMetadataProvider)
+    public FileNamingService(IPhotoFileMetadataProvider photoFileMetadataProvider, IVideoFileMetadataProvider videoFileMetadataProvider, IFileMetadataProvider fileMetadataProvider)
     {
         _photoFileMetadataProvider = photoFileMetadataProvider;
         _videoFileMetadataProvider = videoFileMetadataProvider;
+        _fileMetadataProvider = fileMetadataProvider;
     }
 
 
@@ -66,7 +68,8 @@ public class FileNamingService : IFileNamingService
         }
 
         // If neither photo nor video metadata exists, return the original file name
-        return Path.Combine(targetFolderPath, sourceFileInfo.Name);
+        var fileMetadata = _fileMetadataProvider.GetMetadata(sourceFilePath);
+        return BuildTargetFilePath (targetFolderPath, fileMetadata);
     }
 
     public string MakeUniqueTargetFilePath(string sourceFilePath, string targetFolderPath)
@@ -119,6 +122,19 @@ public class FileNamingService : IFileNamingService
         string newFileName = GenerateDefaultFileName(videoMetadata);
 
         var pickedTimestamp = PickTimestamp(videoMetadata.CreatedAt, videoMetadata.ModifiedAt, videoMetadata.FileMetadata.ModifiedAt);
+        var yearFolderName = pickedTimestamp.ToString("yyyy");
+        var monthFolderName = $"{pickedTimestamp.ToString("MM")}. {pickedTimestamp.ToString("MMMM")}";
+
+        string targetFilePath = Path.Combine(targetFolderPath, yearFolderName, monthFolderName, newFileName);
+
+        return targetFilePath;
+    }
+
+    private string BuildTargetFilePath(string targetFolderPath, FileMetadata fileMetadata)
+    {
+        string newFileName = GenerateDefaultFileName(fileMetadata);
+
+        var pickedTimestamp = PickTimestamp(fileMetadata.CreatedAt, fileMetadata.ModifiedAt, fileMetadata.ModifiedAt);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
         var monthFolderName = $"{pickedTimestamp.ToString("MM")}. {pickedTimestamp.ToString("MMMM")}";
 
@@ -180,6 +196,14 @@ public class FileNamingService : IFileNamingService
         return sb.ToString();
     }
 
+    public string GenerateDefaultFileName(FileMetadata fileMetadata)
+    {
+        var sb = new StringBuilder();
+        string timestamp = FormatTimestamp(fileMetadata.CreatedAt, fileMetadata.ModifiedAt, fileMetadata.ModifiedAt);
+        sb.Append(timestamp);
+        sb.Append($"_{fileMetadata.Name}");
+        return sb.ToString();
+    }
 
 
     static string FormatTimestamp(DateTime? timestamp1, DateTime? timestamp2, DateTime fallbackDateTime)

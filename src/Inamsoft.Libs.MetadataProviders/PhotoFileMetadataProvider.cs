@@ -29,9 +29,17 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         if (!fileMetadata.Exists)
             return photoMetadata;
 
-        var directories = ImageMetadataReader.ReadMetadata(filePath);
-        var dirToTagsMap = directories.ToTagDictionary();
-        var tagList = directories.ToTagList();
+        if (!TryReadMetadata(filePath, out GetMetadataResult getMetadataResult))
+        {
+            photoMetadata.TakenAt = fileMetadata.ModifiedAt;
+            photoMetadata.DigitizedAt = fileMetadata.ModifiedAt;
+
+            return photoMetadata;
+        }
+
+        var directories = getMetadataResult.Directories;
+        var dirToTagsMap = getMetadataResult.DirectoryToTagsMap;
+        var tagList = getMetadataResult.MetadataTags;
 
         // Get camera make and model
         var cameraInfo = GetCameraInfo(tagList);
@@ -41,12 +49,12 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
             photoMetadata.CameraModel = cameraInfo.Value.Model;
         }
 
-        (DateTime TakenAt, DateTime DigitizedAt) = GetTimestamps(directories, tagList, photoMetadata.FileMetadata);
+        (DateTime TakenAt, DateTime DigitizedAt) = GetTimestamps(directories!, tagList, photoMetadata.FileMetadata);
         photoMetadata.TakenAt = TakenAt != DateTime.MinValue ? TakenAt : null;
         photoMetadata.DigitizedAt = DigitizedAt != DateTime.MinValue ? DigitizedAt : null;
 
         // Get image dimensions
-        var dimensions = GetImageDimensions(directories, tagList);
+        var dimensions = GetImageDimensions(getMetadataResult);
         if (dimensions.HasValue)
         {
             photoMetadata.Height = dimensions.Value.Height;
@@ -54,7 +62,7 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         }
 
         // Get GPS directory (if available)
-        (string Latitude, string Longitude)? gpsCoordinates = GetGpsCoordinates(directories);
+        (string Latitude, string Longitude)? gpsCoordinates = GetGpsCoordinates(directories!);
         if (gpsCoordinates.HasValue)
         {
             photoMetadata.Latitude = gpsCoordinates.Value.Latitude;
@@ -120,8 +128,38 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         return null;
     }
 
-    (int Height, int Width)? GetImageDimensions(IReadOnlyList<MetadataExtractor.Directory> directories, IReadOnlyList<MetadataTag> tags)
+    (int Height, int Width)? GetImageDimensions(GetMetadataResult getMetadataResult)
     {
+        var directories = getMetadataResult.Directories;
+        if (directories is null || directories.Count == 0)
+            return null;
+
+        // Panasonic Raw Exif IFD0
+        //
+        if (getMetadataResult.DirectoryToTagsMap.ContainsKey("PanasonicRaw Exif IFD0"))
+        {
+            var panasonicTags = getMetadataResult.DirectoryToTagsMap["PanasonicRaw Exif IFD0"];
+            var panaHeightTag = panasonicTags.FirstOrDefault(t => t.Name.Equals("Sensor Height", StringComparison.InvariantCultureIgnoreCase)); // Tag for Image Height
+            var panaWidthTag = panasonicTags.FirstOrDefault(t => t.Name.Equals("Sensor Width", StringComparison.InvariantCultureIgnoreCase));   // Tag for Image Width
+            if (panaHeightTag.HasValue && panaWidthTag.HasValue)
+            {
+                if (int.TryParse(panaHeightTag.Value, out var height) &&
+                    int.TryParse(panaWidthTag.Value, out var width))
+                {
+                    return (height, width);
+                }
+                else
+                {
+                    height = ParseImageDimensionValue(panaHeightTag.Value);
+                    width = ParseImageDimensionValue(panaWidthTag.Value);
+                    if (height > 0 && width > 0)
+                    {
+                        return (height, width);
+                    }
+                }
+            }
+        }
+
         var jpegDirectory = directories.OfType<JpegDirectory>().FirstOrDefault();
         if (jpegDirectory is not null)
         {
@@ -143,8 +181,8 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         }
 
 
-        var heightTag = tags.FirstOrDefault(t => t.Type == ExifDirectoryBase.TagImageHeight);
-        var widthTag = tags.FirstOrDefault(t => t.Type == ExifDirectoryBase.TagImageWidth);
+        var heightTag = getMetadataResult.MetadataTags.FirstOrDefault(t => t.Type == ExifDirectoryBase.TagImageHeight);
+        var widthTag = getMetadataResult.MetadataTags.FirstOrDefault(t => t.Type == ExifDirectoryBase.TagImageWidth);
 
         if (heightTag.HasValue && widthTag.HasValue)
         {

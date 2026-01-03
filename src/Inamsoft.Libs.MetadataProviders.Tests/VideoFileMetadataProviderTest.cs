@@ -91,6 +91,34 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
     }
 
     [Fact]
+    public void GetMetadata_FileExists_ReturnsPopulatedVideoFileMetadata_Mts()
+    {
+        // Arrange
+        // Arrange
+        var filePath = @"..\..\..\..\..\assets\media-files\00001.MTS";
+        var canonicalFilePath = Path.GetFullPath(filePath);
+        var fileInfo = new FileInfo(filePath);
+        var provider = _fixture.VideoFileMetadataProvider;
+
+        // Act
+        var result = provider.GetMetadata(filePath);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.FileMetadata);
+        Assert.Equal(fileInfo.FullName, result.FileMetadata.Path);
+        Assert.Equal(fileInfo.Name, result.FileMetadata.Name);
+        Assert.Equal(Path.GetFileNameWithoutExtension(filePath), result.FileMetadata.NameWithoutExtension);
+        Assert.Equal(fileInfo.Extension, result.FileMetadata.Extension);
+        Assert.Equal(fileInfo.DirectoryName, result.FileMetadata.DirectoryName);
+        Assert.True(result.FileMetadata.Exists);
+        Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+
+    }
+
+    [Fact]
     public void GetMetadata_NullOrWhitespacePath_ThrowsArgumentException()
     {
         var provider = _fixture.VideoFileMetadataProvider;

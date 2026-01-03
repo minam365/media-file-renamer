@@ -46,35 +46,12 @@ internal class MediaFileHelper
 
         int succeededCount = 0;
         int failedCount = 0;
-        var sourceDirectoryInfo = new DirectoryInfo(sourceFolderPath);
-        if (!sourceDirectoryInfo.Exists)
-        {
-            AnsiConsole.MarkupLineInterpolated($"[red]✗ Source folder does not exist: {sourceFolderPath}[/]");
-            throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
-        }
-        SearchOption searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, searchOption);
+        var mediaFiles = GetSourceMediaFiles(sourceFolderPath, sourceFilePattern, recursive);
 
         AnsiConsole.Progress()
             .AutoClear(false)
             .HideCompleted(false)
-            .Columns(new ProgressColumn[]
-            {
-                new SpinnerColumn               // Spinner
-                {
-                    Spinner = Spinner.Known.Default
-                },
-                new TaskDescriptionColumn(),    // Task description
-                new ProgressBarColumn           // Progress bar
-                {
-                    CompletedStyle = new Style(Color.Green),
-                    FinishedStyle = new Style(Color.Lime),
-                    RemainingStyle = new Style(Color.Grey)
-                },
-                new PercentageColumn(),         // Percentage
-                new ElapsedTimeColumn(),        // Elapsed time
-                new RemainingTimeColumn(),      // Remaining time
-            })
+            .Columns(CreateProgressColumns())
             .Start((Action<ProgressContext>)(ctx =>
             {
                 var copyTask = ctx.AddTask("Copying files...", maxValue: mediaFiles.Length);
@@ -121,40 +98,18 @@ internal class MediaFileHelper
 
         return new FileActionResult(succeededCount, failedCount);
     }
-
+    
     public FileActionResult RichMoveFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool overwrite = false, bool recursive = false)
     {
         int succeededCount = 0;
         int failedCount = 0;
-        var sourceDirectoryInfo = new DirectoryInfo(sourceFolderPath);
-        if (!sourceDirectoryInfo.Exists)
-        {
-            throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
-        }
-
-        SearchOption searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, searchOption);
+        List<FileActionErrorInfo> failedSourceFiles = [];
+        var mediaFiles = GetSourceMediaFiles(sourceFolderPath, sourceFilePattern, recursive);
 
         AnsiConsole.Progress()
             .AutoClear(false)
             .HideCompleted(false)
-            .Columns(new ProgressColumn[]
-            {
-                        new SpinnerColumn               // Spinner
-                        {
-                            Spinner = Spinner.Known.Default
-                        },
-                        new TaskDescriptionColumn(),    // Task description
-                        new ProgressBarColumn           // Progress bar
-                        {
-                            CompletedStyle = new Style(Color.Green),
-                            FinishedStyle = new Style(Color.Lime),
-                            RemainingStyle = new Style(Color.Grey)
-                        },
-                        new PercentageColumn(),         // Percentage
-                        new ElapsedTimeColumn(),        // Elapsed time
-                        new RemainingTimeColumn(),      // Remaining time
-            })
+            .Columns(CreateProgressColumns())
             .Start(ctx =>
             {
                 var copyTask = ctx.AddTask("Moving files...", maxValue: mediaFiles.Length);
@@ -187,6 +142,7 @@ internal class MediaFileHelper
                             //AnsiConsole.WriteException(ex);
                             AnsiConsole.MarkupLineInterpolated($"[red]✗ Failed to move {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [yellow]to[/] {targetFolderPath}. [red]Error:[/] {ex.Message}");
                             failedCount++;
+                            failedSourceFiles.Add(new FileActionErrorInfo(mediaFile.FullName, ex.Message));
                         }
                         copyTask.Increment(1);
                         fileCounter++;
@@ -197,6 +153,20 @@ internal class MediaFileHelper
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLineInterpolated($"[yellow]Completed moving files[/]. [green]✓ Succeeded:[/] {succeededCount}, [red]✗ Failed:[/] {failedCount}");
         AnsiConsole.WriteLine();
+        if (failedCount > 0)
+        {
+            AnsiConsole.MarkupLine("[red]Failed to move the following files:[/]");
+            var errorTable = new Table();
+            errorTable.AddColumn("File Path");
+            errorTable.AddColumn("Error Message");
+            foreach (var errorInfo in failedSourceFiles)
+            {
+                errorTable.AddRow($"[yellow]{errorInfo.FilePath}[/]", $"[red]{errorInfo.ErrorMessage}[/]");
+            }
+
+            AnsiConsole.Write(errorTable);
+            AnsiConsole.WriteLine();
+        }
 
         return new FileActionResult(succeededCount, failedCount);
     }
@@ -270,7 +240,44 @@ internal class MediaFileHelper
         }
         return new FileActionResult(succeededCount, failedCount);
     }
+    
+    private static FileInfo[] GetSourceMediaFiles(string sourceFolderPath, string sourceFilePattern, bool recursive)
+    {
+        var sourceDirectoryInfo = new DirectoryInfo(sourceFolderPath);
+        if (!sourceDirectoryInfo.Exists)
+        {
+            AnsiConsole.MarkupLineInterpolated($"[red]✗ Source folder does not exist: {sourceFolderPath}[/]");
+            throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
+        }
+        var searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, searchOption)
+            .OrderBy(fi => fi.DirectoryName)
+            .ToArray();
+        return mediaFiles;
+    }
 
+    static ProgressColumn[] CreateProgressColumns()
+    {
+        ProgressColumn[] columns =
+        [
+            new SpinnerColumn                   // Spinner
+            {
+                Spinner = Spinner.Known.Default
+            },
+            new TaskDescriptionColumn(),        // Task description
+            new ProgressBarColumn               // Progress bar
+            {
+                CompletedStyle = new Style(Color.Green),
+                FinishedStyle = new Style(Color.Lime),
+                RemainingStyle = new Style(Color.Grey)
+            },
+            new PercentageColumn(),             // Percentage
+            new ElapsedTimeColumn(),            // Elapsed time
+            new RemainingTimeColumn() // Remaining time
+        ];
+        return columns;
+    }
 }
 
 internal readonly record struct FileActionResult(int SucceededCount, int FailedCount);
+internal readonly record struct FileActionErrorInfo (string FilePath, string ErrorMessage);

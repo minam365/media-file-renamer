@@ -178,6 +178,37 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
     }
 
     [Fact]
+    public void GetMetadata_FileExists_ReturnsPopulatedFileMetadata_Rw2()
+    {
+        // Arrange
+        var filePath = @"..\..\..\..\..\assets\media-files\P1080216.RW2";
+        var canonicalFilePath = Path.GetFullPath(filePath);
+        var fileInfo = new FileInfo(filePath);
+
+        // Act
+        var result = _provider.GetMetadata(filePath);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.FileMetadata);
+        Assert.Equal(canonicalFilePath, result.FileMetadata.Path);
+        Assert.Equal(Path.GetFileName(filePath), result.FileMetadata.Name);
+        Assert.Equal(Path.GetFileNameWithoutExtension(filePath), result.FileMetadata.NameWithoutExtension);
+        Assert.Equal(Path.GetExtension(filePath), result.FileMetadata.Extension);
+        Assert.Equal(fileInfo.DirectoryName ?? string.Empty, result.FileMetadata.DirectoryName);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
+        Assert.Equal("Panasonic", result.CameraMake);
+        Assert.Equal("DMC-FZ45", result.CameraModel);
+        Assert.Equal(2454, result.Height);
+        Assert.Equal(4396, result.Width);
+        Assert.Equal(DateTime.Parse("2016-02-07T18:26:46"), result.TakenAt);
+        Assert.Null(result.Latitude);
+        Assert.Null(result.Longitude);
+
+    }
+    [Fact]
     public void GetMetadata_FileExists_ReturnsPopulatedFileMetadata_NoExif()
     {
         // Arrange
