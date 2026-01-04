@@ -1,6 +1,7 @@
 ﻿using Inamsoft.Libs.MetadataProviders;
 using Inamsoft.Libs.MetadataProviders.Abstractions;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Inamsoft.Libs.MediaFileRenaming;
 
@@ -120,20 +121,20 @@ public class FileNamingService : IFileNamingService
 
     private string BuildTargetFilePath(string targetFolderPath, PhotoFileMetadata photoMetadata)
     {
-        string newFileName = GenerateDefaultFileName(photoMetadata);
+        string newFileName = SanitizeFileName(GenerateDefaultFileName(photoMetadata));
 
         var pickedTimestamp = PickTimestamp(photoMetadata.TakenAt, photoMetadata.DigitizedAt, photoMetadata.FileMetadata.ModifiedAt);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
         var monthFolderName = $"{pickedTimestamp.ToString("MM")}. {pickedTimestamp.ToString("MMMM")}";
 
         string targetFilePath = Path.Combine(targetFolderPath, yearFolderName, monthFolderName, newFileName);
-
+        
         return targetFilePath;
     }
 
     private string BuildTargetFilePath(string targetFolderPath, VideoFileMetadata videoMetadata)
     {
-        string newFileName = GenerateDefaultFileName(videoMetadata);
+        string newFileName = SanitizeFileName(GenerateDefaultFileName(videoMetadata));
 
         var pickedTimestamp = PickTimestamp(videoMetadata.CreatedAt, videoMetadata.ModifiedAt, videoMetadata.FileMetadata.ModifiedAt);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
@@ -146,7 +147,7 @@ public class FileNamingService : IFileNamingService
 
     private string BuildTargetFilePath(string targetFolderPath, FileMetadata fileMetadata)
     {
-        string newFileName = GenerateDefaultFileName(fileMetadata);
+        string newFileName = SanitizeFileName(GenerateDefaultFileName(fileMetadata));
 
         var pickedTimestamp = PickTimestamp(fileMetadata.CreatedAt, fileMetadata.ModifiedAt, fileMetadata.ModifiedAt);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
@@ -219,6 +220,24 @@ public class FileNamingService : IFileNamingService
         return sb.ToString();
     }
 
+    static string SanitizePath(string input, string replacementChar=" ")
+    {
+        // Combine invalid path and file name characters
+        string invalidChars = Regex.Escape(new string(Path.GetInvalidPathChars()) + new string(Path.GetInvalidFileNameChars()));
+        string invalidCharsPattern = $"[{invalidChars}]";
+
+        // Replace invalid characters with the specified replacement character
+        return Regex.Replace(input, invalidCharsPattern, replacementChar);
+    }
+
+    static string SanitizeFileName(string input, string replacementChar = "-")
+    {
+        // Split the input by invalid filename chars
+        var parts = input.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries);
+        
+        var sanitized = string.Join(replacementChar, parts);
+        return sanitized;
+    }
 
     static string FormatTimestamp(DateTime? timestamp1, DateTime? timestamp2, DateTime fallbackDateTime)
     {
