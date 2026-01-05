@@ -26,6 +26,8 @@ public class FileNamingService : IFileNamingService
         ".raw",
         ".cr2",
         ".rw2",
+        ".mpo",
+        ".psd"
     };
 
     private static readonly HashSet<string> _supportedVideoFileExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -38,7 +40,8 @@ public class FileNamingService : IFileNamingService
         ".flv",
         ".webm",
         ".mts",
-        ".m2ts"
+        ".m2ts",
+        ".3gp"
     };
 
     public FileNamingService(IPhotoFileMetadataProvider photoFileMetadataProvider, IVideoFileMetadataProvider videoFileMetadataProvider, IFileMetadataProvider fileMetadataProvider)
