@@ -43,10 +43,21 @@ internal class MediaFileHelper
 
     public FileActionResult RichCopyFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool overwrite = false, bool recursive = false)
     {
+        AnsiConsole.Clear();
 
+        AnsiConsole.MarkupLineInterpolated(recursive
+            ? (FormattableString)
+            $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](recursive)[/]."
+            : (FormattableString)
+            $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](non-recursive)[/].");
+        
         int succeededCount = 0;
         int failedCount = 0;
         var mediaFiles = GetSourceMediaFiles(sourceFolderPath, sourceFilePattern, recursive);
+        
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"[yellow]Found {mediaFiles.Length} files[/].");
+        AnsiConsole.WriteLine();
 
         AnsiConsole.Progress()
             .AutoClear(false)
@@ -101,10 +112,22 @@ internal class MediaFileHelper
     
     public FileActionResult RichMoveFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool overwrite = false, bool recursive = false)
     {
+        AnsiConsole.Clear();
+
+        AnsiConsole.MarkupLineInterpolated(recursive
+            ? (FormattableString)
+            $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](recursive)[/]."
+            : (FormattableString)
+            $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](non-recursive)[/].");
+
         int succeededCount = 0;
         int failedCount = 0;
         List<FileActionErrorInfo> failedSourceFiles = [];
         var mediaFiles = GetSourceMediaFiles(sourceFolderPath, sourceFilePattern, recursive);
+        
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"[yellow]Found {mediaFiles.Length} files[/].");
+        AnsiConsole.WriteLine();
 
         AnsiConsole.Progress()
             .AutoClear(false)
