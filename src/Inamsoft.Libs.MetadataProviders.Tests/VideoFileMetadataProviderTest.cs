@@ -119,6 +119,33 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
     }
 
     [Fact]
+    public void GetMetadata_FileExists_ReturnsPopulatedVideoFileMetadata_Mts_on_Mac()
+    {
+        // Arrange
+        // Arrange
+        var filePath = @"/Volumes/personal_folder/Seagate 2TB/partition 1/inam.photo2/Photos/00003.MTS";
+        var fileInfo = new FileInfo(filePath);
+        var provider = _fixture.VideoFileMetadataProvider;
+
+        // Act
+        var result = provider.GetMetadata(filePath);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.NotNull(result.FileMetadata);
+        Assert.Equal(fileInfo.FullName, result.FileMetadata.Path);
+        Assert.Equal(fileInfo.Name, result.FileMetadata.Name);
+        Assert.Equal(Path.GetFileNameWithoutExtension(filePath), result.FileMetadata.NameWithoutExtension);
+        Assert.Equal(fileInfo.Extension, result.FileMetadata.Extension);
+        Assert.Equal(fileInfo.DirectoryName, result.FileMetadata.DirectoryName);
+        Assert.True(result.FileMetadata.Exists);
+        Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+
+    }
+    
+    [Fact]
     public void GetMetadata_NullOrWhitespacePath_ThrowsArgumentException()
     {
         var provider = _fixture.VideoFileMetadataProvider;

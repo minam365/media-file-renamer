@@ -33,6 +33,7 @@ public class FileNamingService : IFileNamingService
     private static readonly HashSet<string> _supportedVideoFileExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         ".mp4",
+        ".mpg",
         ".mov",
         ".avi",
         ".mkv",

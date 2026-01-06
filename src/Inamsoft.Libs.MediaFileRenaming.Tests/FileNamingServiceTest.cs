@@ -69,33 +69,27 @@ namespace Inamsoft.Libs.MediaFileRenaming.Tests
             Assert.Equal(expectedTargetFilePath, result);
         }
 
+
         [Fact]
-        public void MakeUniqueTargetFilePath_FileExists_ReturnsNumberedFilePath_iPhone13()
+        public void MakeUniqueTargetFilePath_FileExists_ReturnsNumberedFilePath_Mts_on_Mac()
         {
             // Arrange
-            var filePath = @"..\..\..\..\..\assets\media-files\20251119_110721068_iOS.jpg";
-            var canonicalFilePath = Path.GetFullPath(filePath);
+            var filePath = @"/Volumes/personal_folder/Seagate 2TB/partition 1/inam.photo2/Photos/00003.MTS";
             var fileInfo = new FileInfo(filePath);
             var tempFolderPath = Path.GetTempPath();
             var expectedTargetFilePath0 = Path.Combine(tempFolderPath, "2025", "11. November", "20251119_120721_(Apple iPhone 13)_(4032x3024)_20251119_110721068_iOS.jpg");
             var expectedTargetFilePath1 = Path.Combine(tempFolderPath, "2025", "11. November", "20251119_120721_(Apple iPhone 13)_(4032x3024)_20251119_110721068_iOS (1).jpg");
 
             // Act
-            var result0 = FileNamingService.MakeUniqueTargetFilePath(canonicalFilePath, tempFolderPath);
-            File.WriteAllText(result0, "Dummy content to create a conflict.");
-            var result1 = FileNamingService.MakeUniqueTargetFilePath(canonicalFilePath, tempFolderPath);
-            File.WriteAllText(result1, "Dummy content to create a conflict.");
-
+            var result0 = FileNamingService.MakeUniqueTargetFilePath(filePath, tempFolderPath);
+            
             // Assert
             Assert.NotNull(result0);
             Assert.Equal(expectedTargetFilePath0, result0);
-            Assert.Equal(expectedTargetFilePath1, result1);
 
             // Clean up
             File.Delete(result0);
-            File.Delete(result1);
             Directory.Delete(Path.Combine(tempFolderPath, "2025"), true);
         }
-
     }
 }

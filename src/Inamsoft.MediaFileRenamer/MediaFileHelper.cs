@@ -43,8 +43,6 @@ internal class MediaFileHelper
 
     public FileActionResult RichCopyFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool overwrite = false, bool recursive = false)
     {
-        AnsiConsole.Clear();
-
         AnsiConsole.MarkupLineInterpolated(recursive
             ? (FormattableString)
             $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](recursive)[/]."
@@ -112,8 +110,6 @@ internal class MediaFileHelper
     
     public FileActionResult RichMoveFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool overwrite = false, bool recursive = false)
     {
-        AnsiConsole.Clear();
-
         AnsiConsole.MarkupLineInterpolated(recursive
             ? (FormattableString)
             $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](recursive)[/]."
