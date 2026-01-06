@@ -186,7 +186,7 @@ public class FileNamingService : IFileNamingService
 
         if (includeGpsInfo)
         {
-            string? gpsCoordinates = FormatGpsCoordinates(photoFileMetadata.Latitude, photoFileMetadata.Longitude);
+            var gpsCoordinates = FormatGpsCoordinates(photoFileMetadata.Latitude, photoFileMetadata.Longitude);
             if (!string.IsNullOrEmpty(gpsCoordinates))
             {
                 sb.Append($"_(Gps={gpsCoordinates})");
@@ -205,7 +205,7 @@ public class FileNamingService : IFileNamingService
         sb.Append(timestamp);
         if (includeImageDimensions)
         {
-            string? mediaDimensions = FormatMediaDimensions(videoFileMetadata.Width, videoFileMetadata.Height);
+            var mediaDimensions = FormatMediaDimensions(videoFileMetadata.Width, videoFileMetadata.Height);
             if (!string.IsNullOrEmpty(mediaDimensions))
             {
                 sb.Append($"_({mediaDimensions})");

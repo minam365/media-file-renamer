@@ -30,10 +30,10 @@ internal class MediaFileHelper
         IHost host = Host.CreateDefaultBuilder()
                         .ConfigureServices((context, services) =>
                         {
-                            services.TryAddSingleton<IPhotoFileMetadataProvider, PhotoFileMetadataProvider>();
-                            services.TryAddSingleton<IFileMetadataProvider, FileMetadataProvider>();
-                            services.TryAddSingleton<IVideoFileMetadataProvider, VideoFileMetadataProvider>();
-                            services.TryAddSingleton<IFileNamingService, FileNamingService>();
+                            services.TryAddTransient<IPhotoFileMetadataProvider, PhotoFileMetadataProvider>();
+                            services.TryAddTransient<IFileMetadataProvider, FileMetadataProvider>();
+                            services.TryAddTransient<IVideoFileMetadataProvider, VideoFileMetadataProvider>();
+                            services.TryAddTransient<IFileNamingService, FileNamingService>();
                         })
                         .Build();
 
@@ -147,6 +147,11 @@ internal class MediaFileHelper
                             string targetFilePath = overwrite
                                 ? FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath)
                                 : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath);
+                            
+                            AnsiConsole.MarkupLineInterpolated($"  ::: Source file:             [dim yellow]{mediaFile.Name}[/] --> [dim yellow]{targetFilePath}[/]");
+                            AnsiConsole.MarkupLineInterpolated($"  ::: Source last access time: [dim yellow]{mediaFile.LastAccessTime}[/]");
+                            AnsiConsole.MarkupLineInterpolated($"  ::: Source creation time:    [dim yellow]{mediaFile.CreationTime}[/]");
+                            
                             var targetDirectory = Path.GetDirectoryName(targetFilePath);
                             if (!Directory.Exists(targetDirectory))
                             {
@@ -288,8 +293,8 @@ internal class MediaFileHelper
             new ProgressBarColumn               // Progress bar
             {
                 CompletedStyle = new Style(Color.Green),
-                FinishedStyle = new Style(Color.Lime),
-                RemainingStyle = new Style(Color.Grey)
+                FinishedStyle = new Style(Color.Red1),
+                RemainingStyle = new Style(Color.Yellow)
             },
             new PercentageColumn(),             // Percentage
             new ElapsedTimeColumn(),            // Elapsed time
