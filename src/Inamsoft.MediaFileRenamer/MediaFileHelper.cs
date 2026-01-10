@@ -41,17 +41,34 @@ internal class MediaFileHelper
 
     }
 
-    public FileActionResult RichCopyFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool overwrite = false, bool recursive = false)
+    public FileActionResult RichCopyFiles(FileRenameActionRequest request)
     {
-        AnsiConsole.MarkupLineInterpolated(recursive
+        var sourceFolderPath = request.SourceFolderPath;
+        var targetFolderPath = request.TargetFolderPath;
+        var sourceFilePattern = request.SourceFilePattern;
+        var overwrite = request.OverwriteExistingFiles;
+        var recursive = request.Recursive;
+        var filePrefix = request.FilePrefix;
+        
+        AnsiConsole.Write(new Rule("[yellow]Request[/]"));
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"::: Source folder path:        [yellow]{sourceFolderPath}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Target folder path:        [yellow]{targetFolderPath}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Source file pattern:       [yellow]{sourceFilePattern}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Overwrite existing file:   [yellow]{overwrite}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Recursive search:          [yellow]{recursive}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Target file prefix:        [yellow]{filePrefix}[/]");
+        AnsiConsole.WriteLine();
+        
+        AnsiConsole.MarkupLineInterpolated(request.Recursive
             ? (FormattableString)
-            $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](recursive)[/]."
+            $"[yellow]Getting files[/] from [green]{request.SourceFolderPath}[/] matching [green]{request.SourceFilePattern}[/] [dim yellow](recursive)[/]."
             : (FormattableString)
-            $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](non-recursive)[/].");
+            $"[yellow]Getting files[/] from [green]{request.SourceFolderPath}[/] matching [green]{request.SourceFilePattern}[/] [dim yellow](non-recursive)[/].");
         
         int succeededCount = 0;
         int failedCount = 0;
-        var mediaFiles = GetSourceMediaFiles(sourceFolderPath, sourceFilePattern, recursive);
+        var mediaFiles = GetSourceMediaFiles(request.SourceFolderPath, request.SourceFilePattern, request.Recursive);
         
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLineInterpolated($"[yellow]Found {mediaFiles.Length} files[/].");
@@ -73,18 +90,18 @@ internal class MediaFileHelper
                         try
                         {
                             AnsiConsole.WriteLine();
-                            AnsiConsole.MarkupLineInterpolated($"[dim yellow]→ Copying {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [dim yellow]to[/] {targetFolderPath}");
+                            AnsiConsole.MarkupLineInterpolated($"[dim yellow]→ Copying {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [dim yellow]to[/] {request.TargetFolderPath}");
 
-                            string targetFilePath = overwrite
-                                ? FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath)
-                                : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath);
+                            string targetFilePath = request.OverwriteExistingFiles
+                                ? FileNamingService.GetTargetFilePath(mediaFile.FullName, request.TargetFolderPath, request.FilePrefix)
+                                : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, request.TargetFolderPath, request.FilePrefix);
                             var targetDirectory = Path.GetDirectoryName(targetFilePath);
                             if (!Directory.Exists(targetDirectory))
                             {
                                 Directory.CreateDirectory(targetDirectory!);
                             }
 
-                            File.Copy(mediaFile.FullName, targetFilePath, overwrite);
+                            File.Copy(mediaFile.FullName, targetFilePath, request.OverwriteExistingFiles);
                             succeededCount++;
 
                             AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Copied  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [green]to[/] {targetFilePath}");
@@ -92,7 +109,7 @@ internal class MediaFileHelper
                         catch (Exception ex)
                         {
                             //AnsiConsole.WriteException(ex);
-                            AnsiConsole.MarkupLineInterpolated($"[red]✗ Failed to copy {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [yellow]to[/] {targetFolderPath} [red]Error:[/] {ex.Message}");
+                            AnsiConsole.MarkupLineInterpolated($"[red]✗ Failed to copy {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [yellow]to[/] {request.TargetFolderPath} [red]Error:[/] {ex.Message}");
                             failedCount++;
                         }
                         copyTask.Increment(1);
@@ -108,8 +125,25 @@ internal class MediaFileHelper
         return new FileActionResult(succeededCount, failedCount);
     }
     
-    public FileActionResult RichMoveFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool overwrite = false, bool recursive = false)
+    public FileActionResult RichMoveFiles(FileRenameActionRequest request)
     {
+        var sourceFolderPath = request.SourceFolderPath;
+        var targetFolderPath = request.TargetFolderPath;
+        var sourceFilePattern = request.SourceFilePattern;
+        var overwrite = request.OverwriteExistingFiles;
+        var recursive = request.Recursive;
+        var filePrefix = request.FilePrefix;
+        
+        AnsiConsole.Write(new Rule("[yellow]Request[/]"));
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"::: Source folder path:        [yellow]{sourceFolderPath}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Target folder path:        [yellow]{targetFolderPath}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Source file pattern:       [yellow]{sourceFilePattern}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Overwrite existing file:   [yellow]{overwrite}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Recursive search:          [yellow]{recursive}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Target file prefix:        [yellow]{filePrefix}[/]");
+        AnsiConsole.WriteLine();
+        
         AnsiConsole.MarkupLineInterpolated(recursive
             ? (FormattableString)
             $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](recursive)[/]."
@@ -119,6 +153,9 @@ internal class MediaFileHelper
         int succeededCount = 0;
         int failedCount = 0;
         List<FileActionErrorInfo> failedSourceFiles = [];
+
+        AnsiConsole.WriteLine();
+        
         var mediaFiles = GetSourceMediaFiles(sourceFolderPath, sourceFilePattern, recursive);
         
         AnsiConsole.WriteLine();
@@ -145,8 +182,8 @@ internal class MediaFileHelper
                             AnsiConsole.MarkupLineInterpolated($"[dim yellow]→ Moving {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [dim yellow]to[/] {targetFolderPath}");
 
                             string targetFilePath = overwrite
-                                ? FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath)
-                                : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath);
+                                ? FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath, filePrefix)
+                                : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath, filePrefix);
                             
                             AnsiConsole.MarkupLineInterpolated($"  ::: Source file:             [dim yellow]{mediaFile.Name}[/] --> [dim yellow]{targetFilePath}[/]");
                             AnsiConsole.MarkupLineInterpolated($"  ::: Source last access time: [dim yellow]{mediaFile.LastAccessTime}[/]");

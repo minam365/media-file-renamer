@@ -10,12 +10,15 @@ internal class MoveFilesCommand : Command<FileActionSettings>
         var mediaFileHelper = new MediaFileHelper();
         try
         {
-            var result = mediaFileHelper.RichMoveFiles(
-                settings.SourceFolderPath,
-                settings.TargetFolderPath,
-                settings.SourceFilePattern,
-                settings.Overwrite,
-                settings.Recursive);
+            FileRenameActionRequest request = new(settings.SourceFolderPath, settings.TargetFolderPath)
+            {
+                SourceFilePattern = settings.SourceFilePattern, 
+                Recursive = settings.Recursive, 
+                OverwriteExistingFiles = settings.Overwrite,
+                FilePrefix = settings.FilePrefix
+            };
+            
+            var result = mediaFileHelper.RichMoveFiles(request);
 
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();

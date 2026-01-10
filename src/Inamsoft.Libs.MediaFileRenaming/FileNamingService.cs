@@ -67,7 +67,8 @@ public class FileNamingService : IFileNamingService
         return IsSupportedPhotoFileExtension(fileExtension) || IsSupportedVideoFileExtension(fileExtension);
     }
 
-    public string GetTargetFilePath(string sourceFilePath, string targetFolderPath)
+    /// <inheritdoc/>
+    public string GetTargetFilePath(string sourceFilePath, string targetFolderPath, string? targetFileNamePrefix = null)
     {
         FileInfo sourceFileInfo = new(sourceFilePath);
         if (!sourceFileInfo.Exists)
@@ -78,22 +79,23 @@ public class FileNamingService : IFileNamingService
         if (_supportedPhotoFileExtensions.Contains(sourceFileInfo.Extension))
         {
             var photoMetadata = _photoFileMetadataProvider.GetMetadata(sourceFilePath);
-            return BuildTargetFilePath(targetFolderPath, photoMetadata);
+            return BuildTargetFilePath(targetFolderPath, photoMetadata, targetFileNamePrefix);
         }
         else if (_supportedVideoFileExtensions.Contains(sourceFileInfo.Extension))
         {
             var videoMetadata = _videoFileMetadataProvider.GetMetadata(sourceFilePath);
-            return BuildTargetFilePath(targetFolderPath, videoMetadata);
+            return BuildTargetFilePath(targetFolderPath, videoMetadata, targetFileNamePrefix);
         }
 
         // If neither photo nor video metadata exists, return the original file name
         var fileMetadata = _fileMetadataProvider.GetMetadata(sourceFilePath);
-        return BuildTargetFilePath (targetFolderPath, fileMetadata);
+        return BuildTargetFilePath (targetFolderPath, fileMetadata, targetFileNamePrefix);
     }
 
-    public string MakeUniqueTargetFilePath(string sourceFilePath, string targetFolderPath)
+    /// <inheritdoc/>
+    public string MakeUniqueTargetFilePath(string sourceFilePath, string targetFolderPath, string? targetFileNamePrefix = null)
     {
-        var targetFilePath = GetTargetFilePath(sourceFilePath, targetFolderPath);
+        var targetFilePath = GetTargetFilePath(sourceFilePath, targetFolderPath, targetFileNamePrefix);
 
         DirectoryInfo targetDirectoryInfo = new(Path.GetDirectoryName(targetFilePath)!);
         if (!targetDirectoryInfo.Exists)
@@ -123,50 +125,52 @@ public class FileNamingService : IFileNamingService
         return targetFilePath;
     }
 
-    private string BuildTargetFilePath(string targetFolderPath, PhotoFileMetadata photoMetadata)
+    private string BuildTargetFilePath(string targetFolderPath, PhotoFileMetadata photoMetadata, string? targetFileNamePrefix = null)
     {
-        string newFileName = SanitizeFileName(GenerateDefaultFileName(photoMetadata));
+        var newFileName = SanitizeFileName(GenerateDefaultFileName(photoMetadata, targetFileNamePrefix: targetFileNamePrefix));
 
         var pickedTimestamp = PickTimestamp(photoMetadata.TakenAt, photoMetadata.DigitizedAt, photoMetadata.FileMetadata.ModifiedAt);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
-        var monthFolderName = $"{pickedTimestamp.ToString("MM")}. {pickedTimestamp.ToString("MMMM")}";
+        var monthFolderName = $"{pickedTimestamp:MM}. {pickedTimestamp:MMMM}";
 
         string targetFilePath = Path.Combine(targetFolderPath, yearFolderName, monthFolderName, newFileName);
         
         return targetFilePath;
     }
 
-    private string BuildTargetFilePath(string targetFolderPath, VideoFileMetadata videoMetadata)
+    private string BuildTargetFilePath(string targetFolderPath, VideoFileMetadata videoMetadata, string? targetFileNamePrefix = null)
     {
-        string newFileName = SanitizeFileName(GenerateDefaultFileName(videoMetadata));
+        var newFileName = SanitizeFileName(GenerateDefaultFileName(videoMetadata, targetFileNamePrefix: targetFileNamePrefix));
 
         var pickedTimestamp = PickTimestamp(videoMetadata.CreatedAt, videoMetadata.ModifiedAt, videoMetadata.FileMetadata.ModifiedAt);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
-        var monthFolderName = $"{pickedTimestamp.ToString("MM")}. {pickedTimestamp.ToString("MMMM")}";
+        var monthFolderName = $"{pickedTimestamp:MM}. {pickedTimestamp:MMMM}";
 
         string targetFilePath = Path.Combine(targetFolderPath, yearFolderName, monthFolderName, newFileName);
 
         return targetFilePath;
     }
 
-    private string BuildTargetFilePath(string targetFolderPath, FileMetadata fileMetadata)
+    private string BuildTargetFilePath(string targetFolderPath, FileMetadata fileMetadata, string? targetFileNamePrefix = null)
     {
-        string newFileName = SanitizeFileName(GenerateDefaultFileName(fileMetadata));
+        var newFileName = SanitizeFileName(GenerateDefaultFileName(fileMetadata, targetFileNamePrefix));
 
         var pickedTimestamp = PickTimestamp(fileMetadata.CreatedAt, fileMetadata.ModifiedAt, fileMetadata.ModifiedAt);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
-        var monthFolderName = $"{pickedTimestamp.ToString("MM")}. {pickedTimestamp.ToString("MMMM")}";
+        var monthFolderName = $"{pickedTimestamp:MM}. {pickedTimestamp:MMMM}";
 
         string targetFilePath = Path.Combine(targetFolderPath, yearFolderName, monthFolderName, newFileName);
 
         return targetFilePath;
     }
 
-    public string GenerateDefaultFileName(PhotoFileMetadata photoFileMetadata, bool includeImageDimensions = true, bool includeGpsInfo = false)
+    public string GenerateDefaultFileName(PhotoFileMetadata photoFileMetadata, bool includeImageDimensions = true, bool includeGpsInfo = false, string? targetFileNamePrefix = null)
     {
         var sb = new StringBuilder();
+        if (!string.IsNullOrEmpty(targetFileNamePrefix))
+            sb.Append(targetFileNamePrefix).Append('_');
 
-        string timestamp = FormatTimestamp(photoFileMetadata.TakenAt, photoFileMetadata.DigitizedAt, photoFileMetadata.FileMetadata.ModifiedAt);
+        var timestamp = FormatTimestamp(photoFileMetadata.TakenAt, photoFileMetadata.DigitizedAt, photoFileMetadata.FileMetadata.ModifiedAt);
         sb.Append(timestamp);
 
         var cameraInfo = FormatCameraInfo(photoFileMetadata.CameraMake, photoFileMetadata.CameraModel);
@@ -198,10 +202,13 @@ public class FileNamingService : IFileNamingService
         return sb.ToString();
     }
 
-    public string GenerateDefaultFileName(VideoFileMetadata videoFileMetadata, bool includeImageDimensions = true)
+    public string GenerateDefaultFileName(VideoFileMetadata videoFileMetadata, bool includeImageDimensions = true, string? targetFileNamePrefix = null)
     {
         var sb = new StringBuilder();
-        string timestamp = FormatTimestamp(videoFileMetadata.CreatedAt, videoFileMetadata.ModifiedAt, videoFileMetadata.FileMetadata.ModifiedAt);
+        if (!string.IsNullOrEmpty(targetFileNamePrefix))
+            sb.Append(targetFileNamePrefix).Append('_');
+        
+        var timestamp = FormatTimestamp(videoFileMetadata.CreatedAt, videoFileMetadata.ModifiedAt, videoFileMetadata.FileMetadata.ModifiedAt);
         sb.Append(timestamp);
         if (includeImageDimensions)
         {
@@ -215,9 +222,12 @@ public class FileNamingService : IFileNamingService
         return sb.ToString();
     }
 
-    public string GenerateDefaultFileName(FileMetadata fileMetadata)
+    public string GenerateDefaultFileName(FileMetadata fileMetadata, string? targetFileNamePrefix = null)
     {
         var sb = new StringBuilder();
+        if (!string.IsNullOrEmpty(targetFileNamePrefix))
+            sb.Append(targetFileNamePrefix).Append('_');
+        
         string timestamp = FormatTimestamp(fileMetadata.CreatedAt, fileMetadata.ModifiedAt, fileMetadata.ModifiedAt);
         sb.Append(timestamp);
         sb.Append($"_{fileMetadata.Name}");

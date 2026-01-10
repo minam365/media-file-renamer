@@ -27,5 +27,10 @@ internal class FileActionSettings : CommandSettings
     [Description("If set to true, processes files in all subdirectories of the source folder recursively.")]
     [DefaultValue(false)]
     public bool Recursive { get; set; } = false;
+    
+    [CommandOption("-f|--file-prefix")]
+    [Description("A prefix to be added to the beginning of the target file name.")]
+    [DefaultValue("")]
+    public string? FilePrefix { get; set; } = string.Empty;
 
 }
