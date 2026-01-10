@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
   </Folder>
   <Project Path="src/Inamsoft.Libs.MediaFileRenaming.Tests/Inamsoft.Libs.MediaFileRenaming.Tests.csproj" Id="5931fe06-0c31-4f55-bd42-7cd002fc6208" />
   <Project Path="src/Inamsoft.Libs.MediaFileRenaming/Inamsoft.Libs.MediaFileRenaming.csproj" Id="ea3d970d-824d-4349-95d8-16a4c7f3cd18" />

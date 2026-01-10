@@ -2,6 +2,7 @@
 using Inamsoft.MediaFileRenamer.Commands;
 using Spectre.Console;
 using Spectre.Console.Cli;
+using System.Reflection;
 
 //var sourceFolderPath = args.Length > 0 ? args[0] : @"J:\Public\Kaan and Varunika - 17.08.2024\Pana FZ45";
 //var sourceFolderPath = args.Length > 0 ? args[0] : @"J:\Public\Kaan's Standesamt\DCIM\100_PANA";
@@ -27,7 +28,11 @@ var targetFolderPath = args.Length > 2 ? args[2] : @"J:\-RENAMED-\Emin's Camera"
 
 const string appName = "Inamsoft Media File Renamer";
 
-var figletText= new FigletText(appName)
+var infoVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+string appNameWithVersion = string.IsNullOrWhiteSpace(infoVersion) ? appName : $"{appName} v{infoVersion}";
+
+
+var figletText= new FigletText(appNameWithVersion)
     .Centered()
     .Color(Color.Green);
 AnsiConsole.Write(figletText);

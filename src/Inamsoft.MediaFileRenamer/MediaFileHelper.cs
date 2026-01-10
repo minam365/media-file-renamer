@@ -185,9 +185,10 @@ internal class MediaFileHelper
                                 ? FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath, filePrefix)
                                 : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath, filePrefix);
                             
-                            AnsiConsole.MarkupLineInterpolated($"  ::: Source file:             [dim yellow]{mediaFile.Name}[/] --> [dim yellow]{targetFilePath}[/]");
-                            AnsiConsole.MarkupLineInterpolated($"  ::: Source last access time: [dim yellow]{mediaFile.LastAccessTime}[/]");
-                            AnsiConsole.MarkupLineInterpolated($"  ::: Source creation time:    [dim yellow]{mediaFile.CreationTime}[/]");
+                            AnsiConsole.MarkupLineInterpolated($"  ::: [dim]Source file path:[/]{mediaFile.FullName}");
+                            AnsiConsole.MarkupLineInterpolated($"  ::: [dim]Source file size:[/]{mediaFile.Length:N0} bytes");
+                            AnsiConsole.MarkupLineInterpolated($"  ::: [dim]Source file date:[/]{mediaFile.LastWriteTime}");
+                            AnsiConsole.MarkupLineInterpolated($"  ::: [dim]Target file path:[/]{targetFilePath}");
                             
                             var targetDirectory = Path.GetDirectoryName(targetFilePath);
                             if (!Directory.Exists(targetDirectory))
@@ -330,8 +331,8 @@ internal class MediaFileHelper
             new ProgressBarColumn               // Progress bar
             {
                 CompletedStyle = new Style(Color.Green),
-                FinishedStyle = new Style(Color.Red1),
-                RemainingStyle = new Style(Color.Yellow)
+                FinishedStyle = new Style(Color.Green),
+                RemainingStyle = new Style(Color.White)
             },
             new PercentageColumn(),             // Percentage
             new ElapsedTimeColumn(),            // Elapsed time
