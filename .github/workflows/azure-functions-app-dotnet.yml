@@ -30,6 +30,6 @@ jobs:
       shell: bash # For Linux, use bash
       run: |
         pushd './${{ env.PUBLISH_PATH }}'
-        dotnet build --configuration Release --output ./output -d diag
+        dotnet build src/Inamsoft.MediaFileRenamer/Inamsoft.MediaFileRenamer.csproj --configuration Release --output ./output -v diag
         popd
 
