@@ -39,8 +39,8 @@ public class VideoFileMetadataProvider : BaseMetadataProvider<VideoFileMetadataP
         var tagList = getMetadataResult.MetadataTags;
 
         (DateTime? CreatedAt, DateTime? ModifiedAt) timestamps = GetTimestamps(tagList);
-        videoFileMetadata.CreatedAt = timestamps.CreatedAt;
-        videoFileMetadata.ModifiedAt = timestamps.ModifiedAt;
+        videoFileMetadata.CreatedAt = timestamps.CreatedAt ?? fileMetadata.ModifiedAt;
+        videoFileMetadata.ModifiedAt = timestamps.ModifiedAt ?? fileMetadata.ModifiedAt;
 
         var durationTag = tagList.FirstOrDefault(t => t.Name.Equals("Duration", StringComparison.OrdinalIgnoreCase));
         if (durationTag.HasValue && TimeSpan.TryParse(durationTag.Value, out var duration))
