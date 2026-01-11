@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Inamsoft.MediaFileRenamer": {
+      "commandName": "Project",
+      "commandLineArgs": "copy \"\\\\INAMNAS3\\global_temp\\linux-recovery\\Public\\Shared Pictures\\2014\\2014-08-01\" \"\\\\INAMNAS3\\global_temp\\renamer-test\" -p=\"*.mts\" -o=false -r=false"
+    }
+  }
+}

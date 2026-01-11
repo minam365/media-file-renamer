@@ -9,7 +9,7 @@ public interface IMetadataProvider<TMetadata>
     /// <summary>
     /// Obtains and returns the metadata information from the specified file.
     /// </summary>
-    /// <param name="fileName">The full path of the file from which metadata to obtain.</param>
+    /// <param name="filePath">The full path of the file from which metadata to obtain.</param>
     /// <returns>A <typeparamref name="TMetadata"/> object that contains the obtained metadata information.</returns>
-    TMetadata GetMetadata(string fileName);
+    TMetadata GetMetadata(string filePath);
 }
