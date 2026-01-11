@@ -253,9 +253,9 @@ public class FileNamingService : IFileNamingService
         return sanitized;
     }
 
-    static string FormatTimestamp(DateTime? timestamp1, DateTime? timestamp2, DateTime fallbackDateTime)
+    static string FormatTimestamp(DateTime? createdAtTimestamp, DateTime? modifiedAtTimestamp, DateTime fallbackDateTime)
     {
-        var pickedTimestamp = PickTimestamp(timestamp1, timestamp2, fallbackDateTime);
+        var pickedTimestamp = PickTimestamp(createdAtTimestamp, modifiedAtTimestamp, fallbackDateTime);
         return pickedTimestamp.ToString(DefaultMediaTimestampFormat);
     }
 
@@ -305,15 +305,15 @@ public class FileNamingService : IFileNamingService
         return $"{pickedTimestamp.ToString("MM")}. {pickedTimestamp.ToString("MMMM")}";
     }
 
-    static DateTime PickTimestamp(DateTime? timestamp1, DateTime? timestamp2, DateTime fallbackDateTime)
+    static DateTime PickTimestamp(DateTime? createdAtTimestamp, DateTime? modifiedAtTimestamp, DateTime fallbackDateTime)
     {
-        if (timestamp1.HasValue)
+        if (modifiedAtTimestamp.HasValue)
         {
-            return timestamp1.Value;
+            return modifiedAtTimestamp.Value;
         }
-        if (timestamp2.HasValue)
+        if (createdAtTimestamp.HasValue)
         {
-            return timestamp2.Value;
+            return createdAtTimestamp.Value;
         }
         return fallbackDateTime;
     }
