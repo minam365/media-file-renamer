@@ -33,4 +33,9 @@ internal class FileActionSettings : CommandSettings
     [DefaultValue("")]
     public string? FilePrefix { get; set; } = string.Empty;
 
+    [CommandOption("-m|--min-file-size-in-bytes")]
+    [Description("Minimum file size in bytes to consider for processing.")]
+    [DefaultValue(2048)]
+    public int MinFileSizeInBytes { get; set; } = 2048;
+
 }

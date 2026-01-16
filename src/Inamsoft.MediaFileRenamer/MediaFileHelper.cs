@@ -1,5 +1,6 @@
 ﻿using Inamsoft.Libs.MediaFileRenaming;
 using Inamsoft.Libs.MetadataProviders;
+using Inamsoft.MediaFileRenamer.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -342,6 +343,3 @@ internal class MediaFileHelper
         return columns;
     }
 }
-
-internal readonly record struct FileActionResult(int SucceededCount, int FailedCount);
-internal readonly record struct FileActionErrorInfo (string FilePath, string ErrorMessage);
