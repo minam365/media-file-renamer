@@ -12,11 +12,17 @@ public static class SpectreFileScan
     {
         var results = new ConcurrentBag<FileScanResult>();
 
+        var directoryStats = new ConcurrentDictionary<string, DirectoryAggregation>();
+        directoryStats[root.FullName] = new DirectoryAggregation
+        {
+            DirectoryPath = root.FullName
+        };
+
         var tree = new Tree($"[bold]{root.FullName}[/]");
         var dirNodes = new ConcurrentDictionary<string, TreeNode>();
 
         // two-pass: pre-scan for accurate file count
-        var totalFiles = CountFilesForScan(root, options.MinFileSizeInBytes, options.OnError);
+        var totalFiles = CountFilesForScan(root, options.MinFileSizeInBytes, options.SearchPattern, options.OnError);
         if (totalFiles == 0)
             totalFiles = 1; // avoid division by zero
 
@@ -37,6 +43,17 @@ public static class SpectreFileScan
                     var node = parentNode.AddNode($"📁 {d.Name}");
                     dirNodes.TryAdd(d.FullName, node);
                 }
+
+                if (directoryStats.TryGetValue(parent, out var stats))
+                {
+                    Interlocked.Increment(ref stats.SubdirectoryCount);
+                }
+
+                directoryStats.TryAdd(d.FullName, new DirectoryAggregation()
+                { 
+                    DirectoryPath = d.FullName
+                });
+
             },
 
             OnFileFound = r =>
@@ -53,6 +70,13 @@ public static class SpectreFileScan
                 {
                     tree.AddNode(label);
                 }
+
+                if (directoryStats.TryGetValue(r.DirectoryPath, out var stats))
+                {
+                    Interlocked.Add(ref stats.TotalSize, r.Size);
+                    Interlocked.Increment(ref stats.FileCount);
+                }
+
             }
         };
 
@@ -84,10 +108,22 @@ public static class SpectreFileScan
                     });
             });
 
+        foreach (var (path, stats) in directoryStats)
+        {
+            if (dirNodes.TryGetValue(path, out var node)) 
+            { 
+                node.AddNode(
+                    $"[grey]Files: {stats.FileCount}, " + 
+                    $"Size: {stats.TotalSize} bytes, " + 
+                    $"Subdirs: {stats.SubdirectoryCount}[/]"); 
+            }
+        }
+
+
         return results.ToList();
     }
 
-    private static long CountFilesForScan(DirectoryInfo root, long minSize, Action<Exception>? onError)
+    private static long CountFilesForScan(DirectoryInfo root, long minSize, string searchPattern, Action<Exception>? onError)
     {
         long count = 0;
 
@@ -100,7 +136,7 @@ public static class SpectreFileScan
 
             IEnumerable<FileInfo> SafeFiles()
             {
-                try { return current.EnumerateFiles(); }
+                try { return current.EnumerateFiles(searchPattern); }
                 catch (Exception ex) { onError?.Invoke(ex); return Enumerable.Empty<FileInfo>(); }
             }
 

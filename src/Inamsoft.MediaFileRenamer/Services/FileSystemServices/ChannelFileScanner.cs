@@ -30,7 +30,7 @@ public static class ChannelFileScanner
 
                             IEnumerable<FileInfo> SafeFiles()
                             {
-                                try { return dir.EnumerateFiles(); }
+                                try { return dir.EnumerateFiles(options.SearchPattern); }
                                 catch (Exception ex) { options.OnError?.Invoke(ex); return Enumerable.Empty<FileInfo>(); }
                             }
 
