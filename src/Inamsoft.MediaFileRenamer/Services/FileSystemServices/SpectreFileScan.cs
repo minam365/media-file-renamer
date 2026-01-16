@@ -12,9 +12,10 @@ public static class SpectreFileScan
     {
         var results = new ConcurrentBag<FileScanResult>();
 
+        // Tree is the root renderable
         var tree = new Tree(root.FullName);
 
-        // Dictionary stores TreeNode for children, but the root is the Tree itself
+        // Dictionary maps directory paths → TreeNode
         var dirNodes = new ConcurrentDictionary<string, TreeNode>();
 
         options = options with
@@ -22,34 +23,34 @@ public static class SpectreFileScan
             OnDirectoryEntered = d =>
             {
                 var parent = d.Parent?.FullName;
-                if (parent is null)
-                    return;
+                if (parent is null) return;
 
                 if (parent == root.FullName)
                 {
-                    var node = tree.AddNode(d.Name);
+                    var node = tree.AddNode($"📁 {d.Name}");
                     dirNodes.TryAdd(d.FullName, node);
                 }
                 else if (dirNodes.TryGetValue(parent, out var parentNode))
                 {
-                    var node = parentNode.AddNode(d.Name);
+                    var node = parentNode.AddNode($"📁 {d.Name}");
                     dirNodes.TryAdd(d.FullName, node);
                 }
             },
 
             OnFileFound = r =>
             {
+                results.Add(r);
+
                 if (dirNodes.TryGetValue(r.DirectoryPath, out var parentNode))
                 {
-                    parentNode.AddNode(r.File.Name);
+                    parentNode.AddNode($"📄 {r.File.Name}");
                 }
                 else if (r.DirectoryPath == root.FullName)
                 {
-                    tree.AddNode(r.File.Name);
+                    tree.AddNode($"📄 {r.File.Name}");
                 }
             }
         };
-
 
         await AnsiConsole.Progress()
             .AutoClear(false)
@@ -68,7 +69,7 @@ public static class SpectreFileScan
                     {
                         await foreach (var _ in ChannelFileScanner.ScanAsync(root, options, cancellationToken))
                         {
-                            task.Increment(0.1); // heuristic; you can wire real progress if you pre-scan
+                            task.Increment(0.1);
                             liveCtx.Refresh();
                         }
 

@@ -92,14 +92,14 @@ public static class ChannelFileScanner
                 }
             }, cancellationToken)).ToList();
 
-        // COMPLETION: close result channel when all consumers finish
+        // COMPLETION: close result channel when consumers finish
         var resultCloser = Task.Run(async () =>
         {
             await Task.WhenAll(fileConsumers);
             resultChannel.Writer.TryComplete();
         }, cancellationToken);
 
-        // STREAM RESULTS: this is the only place we yield
+        // STREAM RESULTS
         await foreach (var result in resultChannel.Reader.ReadAllAsync(cancellationToken))
             yield return result;
 
