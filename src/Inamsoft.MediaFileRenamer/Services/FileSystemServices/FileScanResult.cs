@@ -10,8 +10,7 @@ public sealed class FileScanResult
     public required bool IsHidden { get; init; }
     public required bool IsSystem { get; init; }
     public string? Sha256Hex { get; init; }
+
+    public required string MimeType { get; init; }
+    public required string Icon { get; init; }
 }
-
-
-
-

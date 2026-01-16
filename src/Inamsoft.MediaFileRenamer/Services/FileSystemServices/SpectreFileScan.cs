@@ -12,11 +12,13 @@ public static class SpectreFileScan
     {
         var results = new ConcurrentBag<FileScanResult>();
 
-        // Tree is the root renderable
-        var tree = new Tree(root.FullName);
-
-        // Dictionary maps directory paths → TreeNode
+        var tree = new Tree($"[bold]{root.FullName}[/]");
         var dirNodes = new ConcurrentDictionary<string, TreeNode>();
+
+        // two-pass: pre-scan for accurate file count
+        var totalFiles = CountFilesForScan(root, options.MinFileSizeInBytes, options.OnError);
+        if (totalFiles == 0)
+            totalFiles = 1; // avoid division by zero
 
         options = options with
         {
@@ -41,13 +43,15 @@ public static class SpectreFileScan
             {
                 results.Add(r);
 
+                var label = $"{r.Icon} {r.File.Name} [grey]({r.MimeType}, {r.Size} bytes)[/]";
+
                 if (dirNodes.TryGetValue(r.DirectoryPath, out var parentNode))
                 {
-                    parentNode.AddNode($"📄 {r.File.Name}");
+                    parentNode.AddNode(label);
                 }
                 else if (r.DirectoryPath == root.FullName)
                 {
-                    tree.AddNode($"📄 {r.File.Name}");
+                    tree.AddNode(label);
                 }
             }
         };
@@ -62,14 +66,17 @@ public static class SpectreFileScan
                 new SpinnerColumn())
             .StartAsync(async ctx =>
             {
-                var task = ctx.AddTask("Scanning...", autoStart: true);
+                var task = ctx.AddTask("Scanning...", autoStart: true, maxValue: totalFiles);
+
+                long processed = 0;
 
                 await AnsiConsole.Live(tree)
                     .StartAsync(async liveCtx =>
                     {
                         await foreach (var _ in ChannelFileScanner.ScanAsync(root, options, cancellationToken))
                         {
-                            task.Increment(0.1);
+                            Interlocked.Increment(ref processed);
+                            task.Value = Math.Min(processed, totalFiles);
                             liveCtx.Refresh();
                         }
 
@@ -79,5 +86,49 @@ public static class SpectreFileScan
 
         return results.ToList();
     }
+
+    private static long CountFilesForScan(DirectoryInfo root, long minSize, Action<Exception>? onError)
+    {
+        long count = 0;
+
+        var stack = new Stack<DirectoryInfo>();
+        stack.Push(root);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+
+            IEnumerable<FileInfo> SafeFiles()
+            {
+                try { return current.EnumerateFiles(); }
+                catch (Exception ex) { onError?.Invoke(ex); return Enumerable.Empty<FileInfo>(); }
+            }
+
+            IEnumerable<DirectoryInfo> SafeDirs()
+            {
+                try { return current.EnumerateDirectories(); }
+                catch (Exception ex) { onError?.Invoke(ex); return Enumerable.Empty<DirectoryInfo>(); }
+            }
+
+            foreach (var file in SafeFiles())
+            {
+                try
+                {
+                    if (file.Length >= minSize)
+                        count++;
+                }
+                catch (Exception ex)
+                {
+                    onError?.Invoke(ex);
+                }
+            }
+
+            foreach (var dir in SafeDirs())
+                stack.Push(dir);
+        }
+
+        return count;
+    }
+
 }
 

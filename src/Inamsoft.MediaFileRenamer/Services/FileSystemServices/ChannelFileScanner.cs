@@ -68,6 +68,9 @@ public static class ChannelFileScanner
                 {
                     try
                     {
+                        var mime = Utils.GetMimeType(file); 
+                        var icon = Utils.GetFileIcon(mime);
+
                         var result = new FileScanResult
                         {
                             File = file,
@@ -78,8 +81,10 @@ public static class ChannelFileScanner
                             IsHidden = (file.Attributes & FileAttributes.Hidden) != 0,
                             IsSystem = (file.Attributes & FileAttributes.System) != 0,
                             Sha256Hex = options.ComputeSha256
-                                ? await HashingHelper.ComputeSha256Async(file.FullName, cancellationToken)
-                                : null
+                                ? await Utils.ComputeSha256Async(file.FullName, cancellationToken)
+                                : null,
+                            MimeType = mime,
+                            Icon = icon
                         };
 
                         options.OnFileFound?.Invoke(result);
