@@ -46,18 +46,14 @@ public partial record PhotoFileMetadata
     public string? CameraModel { get; set; }
 
     /// <summary>
-    /// Indicates the orientation of the photo during capture.
+    /// Gets or sets the latitude coordinate as a string representation.
     /// </summary>
-    /// <remarks>
-    /// This property describes how the photo is oriented, such as whether it is
-    /// in landscape or portrait mode. The orientation information is typically
-    /// embedded in the photo's metadata and can be used to correct or adjust
-    /// the display of images when viewed on different devices or software.
-    /// </remarks>
-    public string? Orientation { get; set; }
     public string? Latitude { get; set; }
+
+    /// <summary>
+    /// Gets or sets the longitude coordinate as a string representation.
+    /// </summary>
     public string? Longitude { get; set; }
-    public string? Altitude { get; set; }
 
     /// <summary>
     /// Represents the date and time when the photo was taken.
@@ -98,18 +94,12 @@ public partial record PhotoFileMetadata
     /// </remarks>
     public int? Width { get; set; } = null;
 
-    public string? XResolution { get; set; }
+    //public GpsLatitude? GpsLatitude { get; set; }
+    //public GpsLongitude? GpsLongitude { get; set; }
 
-    public string? YResolution { get; set; }
-    public string? Software { get; set; }
-
-    public string? GpsImgDirection { get; set; }
-    public string? GpsSatellites { get; set; }
-    public string? GpsStatus { get; set; }
-
-    public GpsLatitude? GpsLatitude { get; set; }
-    public GpsLongitude? GpsLongitude { get; set; }
-
+    /// <summary>
+    /// 
+    /// </summary>
     public required FileMetadata FileMetadata { get; set; }
 
 }

@@ -1,0 +1,345 @@
+﻿using Inamsoft.Libs.MediaFileRenaming;
+using Inamsoft.Libs.MetadataProviders;
+using Inamsoft.MediaFileRenamer.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using Spectre.Console;
+
+namespace Inamsoft.MediaFileRenamer;
+
+
+internal class MediaFileHelper
+{
+    private readonly IServiceProvider _serviceProvider;
+
+    public IServiceProvider ServiceProvider => _serviceProvider;
+
+    public IFileMetadataProvider FileMetadataProvider =>
+        _serviceProvider.GetRequiredService<IFileMetadataProvider>();
+
+    public IPhotoFileMetadataProvider PhotoFileMetadataProvider =>
+        _serviceProvider.GetRequiredService<IPhotoFileMetadataProvider>();
+
+    public IVideoFileMetadataProvider VideoFileMetadataProvider =>
+        _serviceProvider.GetRequiredService<IVideoFileMetadataProvider>();
+
+    public IFileNamingService FileNamingService =>
+        _serviceProvider.GetRequiredService<IFileNamingService>();
+    public MediaFileHelper()
+    {
+        IHost host = Host.CreateDefaultBuilder()
+                        .ConfigureServices((context, services) =>
+                        {
+                            services.TryAddTransient<IPhotoFileMetadataProvider, PhotoFileMetadataProvider>();
+                            services.TryAddTransient<IFileMetadataProvider, FileMetadataProvider>();
+                            services.TryAddTransient<IVideoFileMetadataProvider, VideoFileMetadataProvider>();
+                            services.TryAddTransient<IFileNamingService, FileNamingService>();
+                        })
+                        .Build();
+
+        _serviceProvider = host.Services;
+
+    }
+
+    public FileActionResult RichCopyFiles(FileRenameActionRequest request)
+    {
+        var sourceFolderPath = request.SourceFolderPath;
+        var targetFolderPath = request.TargetFolderPath;
+        var sourceFilePattern = request.SourceFilePattern;
+        var overwrite = request.OverwriteExistingFiles;
+        var recursive = request.Recursive;
+        var filePrefix = request.FilePrefix;
+        
+        AnsiConsole.Write(new Rule("[yellow]Request[/]"));
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"::: Source folder path:        [yellow]{sourceFolderPath}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Target folder path:        [yellow]{targetFolderPath}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Source file pattern:       [yellow]{sourceFilePattern}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Overwrite existing file:   [yellow]{overwrite}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Recursive search:          [yellow]{recursive}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Target file prefix:        [yellow]{filePrefix}[/]");
+        AnsiConsole.WriteLine();
+        
+        AnsiConsole.MarkupLineInterpolated(request.Recursive
+            ? (FormattableString)
+            $"[yellow]Getting files[/] from [green]{request.SourceFolderPath}[/] matching [green]{request.SourceFilePattern}[/] [dim yellow](recursive)[/]."
+            : (FormattableString)
+            $"[yellow]Getting files[/] from [green]{request.SourceFolderPath}[/] matching [green]{request.SourceFilePattern}[/] [dim yellow](non-recursive)[/].");
+        
+        int succeededCount = 0;
+        int failedCount = 0;
+        var mediaFiles = GetSourceMediaFiles(request.SourceFolderPath, request.SourceFilePattern, request.Recursive);
+        
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"[yellow]Found {mediaFiles.Length} files[/].");
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.Progress()
+            .AutoClear(false)
+            .HideCompleted(false)
+            .Columns(CreateProgressColumns())
+            .Start((Action<ProgressContext>)(ctx =>
+            {
+                var copyTask = ctx.AddTask("Copying files...", maxValue: mediaFiles.Length);
+
+                while (!copyTask.IsFinished)
+                {
+                    var fileCounter = 1;
+                    foreach (var mediaFile in mediaFiles)
+                    {
+                        try
+                        {
+                            AnsiConsole.WriteLine();
+                            AnsiConsole.MarkupLineInterpolated($"[dim yellow]→ Copying {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [dim yellow]to[/] {request.TargetFolderPath}");
+
+                            string targetFilePath = request.OverwriteExistingFiles
+                                ? FileNamingService.GetTargetFilePath(mediaFile.FullName, request.TargetFolderPath, request.FilePrefix)
+                                : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, request.TargetFolderPath, request.FilePrefix);
+                            var targetDirectory = Path.GetDirectoryName(targetFilePath);
+                            if (!Directory.Exists(targetDirectory))
+                            {
+                                Directory.CreateDirectory(targetDirectory!);
+                            }
+
+                            File.Copy(mediaFile.FullName, targetFilePath, request.OverwriteExistingFiles);
+                            succeededCount++;
+
+                            AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Copied  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [green]to[/] {targetFilePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            //AnsiConsole.WriteException(ex);
+                            AnsiConsole.MarkupLineInterpolated($"[red]✗ Failed to copy {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [yellow]to[/] {request.TargetFolderPath} [red]Error:[/] {ex.Message}");
+                            failedCount++;
+                        }
+                        copyTask.Increment(1);
+                        fileCounter++;
+                    }
+                }
+            }));
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"[yellow]Completed copying files[/]. [green]✓ Succeeded:[/] {succeededCount}, [red]✗ Failed:[/] {failedCount}");
+        AnsiConsole.WriteLine();
+
+        return new FileActionResult(succeededCount, failedCount);
+    }
+    
+    public FileActionResult RichMoveFiles(FileRenameActionRequest request)
+    {
+        var sourceFolderPath = request.SourceFolderPath;
+        var targetFolderPath = request.TargetFolderPath;
+        var sourceFilePattern = request.SourceFilePattern;
+        var overwrite = request.OverwriteExistingFiles;
+        var recursive = request.Recursive;
+        var filePrefix = request.FilePrefix;
+        
+        AnsiConsole.Write(new Rule("[yellow]Request[/]"));
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"::: Source folder path:        [yellow]{sourceFolderPath}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Target folder path:        [yellow]{targetFolderPath}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Source file pattern:       [yellow]{sourceFilePattern}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Overwrite existing file:   [yellow]{overwrite}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Recursive search:          [yellow]{recursive}[/]");
+        AnsiConsole.MarkupLineInterpolated($"::: Target file prefix:        [yellow]{filePrefix}[/]");
+        AnsiConsole.WriteLine();
+        
+        AnsiConsole.MarkupLineInterpolated(recursive
+            ? (FormattableString)
+            $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](recursive)[/]."
+            : (FormattableString)
+            $"[yellow]Getting files[/] from [green]{sourceFolderPath}[/] matching [green]{sourceFilePattern}[/] [dim yellow](non-recursive)[/].");
+
+        int succeededCount = 0;
+        int failedCount = 0;
+        List<FileActionErrorInfo> failedSourceFiles = [];
+
+        AnsiConsole.WriteLine();
+        
+        var mediaFiles = GetSourceMediaFiles(sourceFolderPath, sourceFilePattern, recursive);
+        
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"[yellow]Found {mediaFiles.Length} files[/].");
+        AnsiConsole.WriteLine();
+
+        AnsiConsole.Progress()
+            .AutoClear(false)
+            .HideCompleted(false)
+            .Columns(CreateProgressColumns())
+            .Start(ctx =>
+            {
+                var copyTask = ctx.AddTask("Moving files...", maxValue: mediaFiles.Length);
+
+                while (!copyTask.IsFinished)
+                {
+                    var fileCounter = 1;
+
+                    foreach (var mediaFile in mediaFiles)
+                    {
+                        try
+                        {
+                            AnsiConsole.WriteLine();
+                            AnsiConsole.MarkupLineInterpolated($"[dim yellow]→ Moving {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [dim yellow]to[/] {targetFolderPath}");
+
+                            string targetFilePath = overwrite
+                                ? FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath, filePrefix)
+                                : FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath, filePrefix);
+                            
+                            AnsiConsole.MarkupLineInterpolated($"  ::: [dim]Source file path:[/]{mediaFile.FullName}");
+                            AnsiConsole.MarkupLineInterpolated($"  ::: [dim]Source file size:[/]{mediaFile.Length:N0} bytes");
+                            AnsiConsole.MarkupLineInterpolated($"  ::: [dim]Source file date:[/]{mediaFile.LastWriteTime}");
+                            AnsiConsole.MarkupLineInterpolated($"  ::: [dim]Target file path:[/]{targetFilePath}");
+                            
+                            var targetDirectory = Path.GetDirectoryName(targetFilePath);
+                            if (!Directory.Exists(targetDirectory))
+                            {
+                                Directory.CreateDirectory(targetDirectory!);
+                            }
+                            File.Move(mediaFile.FullName, targetFilePath, overwrite);
+                            succeededCount++;
+                            AnsiConsole.MarkupLineInterpolated($"[bold green]✓ Moved  {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [green]to[/] {targetFilePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            //AnsiConsole.WriteException(ex);
+                            AnsiConsole.MarkupLineInterpolated($"[red]✗ Failed to move {fileCounter} of {mediaFiles.Length}:[/] {mediaFile.Name} [yellow]to[/] {targetFolderPath}. [red]Error:[/] {ex.Message}");
+                            failedCount++;
+                            failedSourceFiles.Add(new FileActionErrorInfo(mediaFile.FullName, ex.Message));
+                        }
+                        copyTask.Increment(1);
+                        fileCounter++;
+                    }
+                }
+            });
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.MarkupLineInterpolated($"[yellow]Completed moving files[/]. [green]✓ Succeeded:[/] {succeededCount}, [red]✗ Failed:[/] {failedCount}");
+        AnsiConsole.WriteLine();
+        if (failedCount > 0)
+        {
+            AnsiConsole.MarkupLine("[red]Failed to move the following files:[/]");
+            var errorTable = new Table();
+            errorTable.AddColumn("File Path");
+            errorTable.AddColumn("Error Message");
+            foreach (var errorInfo in failedSourceFiles)
+            {
+                errorTable.AddRow($"[yellow]{errorInfo.FilePath}[/]", $"[red]{errorInfo.ErrorMessage}[/]");
+            }
+
+            AnsiConsole.Write(errorTable);
+            AnsiConsole.WriteLine();
+        }
+
+        return new FileActionResult(succeededCount, failedCount);
+    }
+
+
+
+    public FileActionResult CopyFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool makeUniqueNames = true)
+    {
+        int succeededCount = 0;
+        int failedCount = 0;
+        var sourceDirectoryInfo = new DirectoryInfo(sourceFolderPath);
+        if (!sourceDirectoryInfo.Exists)
+        {
+            throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
+        }
+        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, SearchOption.TopDirectoryOnly);
+        foreach (var mediaFile in mediaFiles)
+        {
+            try
+            {
+                string targetFilePath = makeUniqueNames
+                    ? FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath)
+                    : FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath);
+                var targetDirectory = Path.GetDirectoryName(targetFilePath);
+                if (!Directory.Exists(targetDirectory))
+                {
+                    Directory.CreateDirectory(targetDirectory!);
+                }
+                File.Copy(mediaFile.FullName, targetFilePath);
+                succeededCount++;
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.WriteException(ex);
+                failedCount++;
+            }
+        }
+        return new FileActionResult(succeededCount, failedCount);
+    }
+
+    public FileActionResult MoveFiles(string sourceFolderPath, string targetFolderPath, string sourceFilePattern = "*.jpg", bool makeUniqueNames = true)
+    {
+        int succeededCount = 0;
+        int failedCount = 0;
+        var sourceDirectoryInfo = new DirectoryInfo(sourceFolderPath);
+        if (!sourceDirectoryInfo.Exists)
+        {
+            throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
+        }
+        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, SearchOption.TopDirectoryOnly);
+        foreach (var mediaFile in mediaFiles)
+        {
+            try
+            {
+                string targetFilePath = makeUniqueNames
+                    ? FileNamingService.MakeUniqueTargetFilePath(mediaFile.FullName, targetFolderPath)
+                    : FileNamingService.GetTargetFilePath(mediaFile.FullName, targetFolderPath);
+                var targetDirectory = Path.GetDirectoryName(targetFilePath);
+                if (!Directory.Exists(targetDirectory))
+                {
+                    Directory.CreateDirectory(targetDirectory!);
+                }
+                File.Move(mediaFile.FullName, targetFilePath);
+                succeededCount++;
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.WriteException(ex);
+                failedCount++;
+            }
+        }
+        return new FileActionResult(succeededCount, failedCount);
+    }
+    
+    private static FileInfo[] GetSourceMediaFiles(string sourceFolderPath, string sourceFilePattern, bool recursive)
+    {
+        var sourceDirectoryInfo = new DirectoryInfo(sourceFolderPath);
+        if (!sourceDirectoryInfo.Exists)
+        {
+            AnsiConsole.MarkupLineInterpolated($"[red]✗ Source folder does not exist: {sourceFolderPath}[/]");
+            throw new DirectoryNotFoundException($"Source folder does not exist: {sourceFolderPath}");
+        }
+        var searchOption = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+        var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, searchOption)
+                                            .Where(fi => fi.Exists && Inamsoft.Libs.MediaFileRenaming.FileNamingService.IsSupportedMediaFileExtension(fi.Extension))
+                                            .Where(fi => fi.Length > 0)
+                                            .OrderBy(fi => fi.DirectoryName)
+                                            .ToArray();
+        return mediaFiles;
+    }
+
+    static ProgressColumn[] CreateProgressColumns()
+    {
+        ProgressColumn[] columns =
+        [
+            new SpinnerColumn                   // Spinner
+            {
+                Spinner = Spinner.Known.Default
+            },
+            new TaskDescriptionColumn(),        // Task description
+            new ProgressBarColumn               // Progress bar
+            {
+                CompletedStyle = new Style(Color.Green),
+                FinishedStyle = new Style(Color.Green),
+                RemainingStyle = new Style(Color.White)
+            },
+            new PercentageColumn(),             // Percentage
+            new ElapsedTimeColumn(),            // Elapsed time
+            new RemainingTimeColumn() // Remaining time
+        ];
+        return columns;
+    }
+}
