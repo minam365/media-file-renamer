@@ -6,7 +6,10 @@ public record FileScanOptions
     public int MaxDegreeOfParallelism { get; init; } = Environment.ProcessorCount;
     public bool ComputeSha256 { get; init; } = false;
 
-     public string SearchPattern { get; init; } = "*"; // default: all files
+    public string SearchPattern { get; init; } = "*"; // default: all files
+
+    // New: whether to enumerate directories recursively. Default true preserves current behavior.
+    public bool Recursive { get; init; } = true;
 
     public Action<Exception>? OnError { get; init; }
     public Action<DirectoryInfo>? OnDirectoryEntered { get; init; }

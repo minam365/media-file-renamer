@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using Inamsoft.MediaFileRenamer.Services.FileSystemServices;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 namespace Inamsoft.MediaFileRenamer.Commands;
@@ -17,7 +18,19 @@ internal class CopyFilesCommand : Command<FileActionSettings>
                 OverwriteExistingFiles = settings.Overwrite,
                 FilePrefix = settings.FilePrefix
             };
-            var result = mediaFileHelper.RichCopyFiles(request);
+            //var result = mediaFileHelper.RichCopyFiles(request);
+
+            var root = new DirectoryInfo(request.SourceFolderPath);
+
+            var options = new FileScanOptions
+            {
+                MinFileSizeInBytes = 3072,
+                SearchPattern = request.SourceFilePattern,
+                MaxDegreeOfParallelism = Environment.ProcessorCount,
+                ComputeSha256 = true,
+                OnError = ex => AnsiConsole.MarkupLine($"[red]Error:[/] {ex.Message}")
+            };
+            var result = SpectreFileScan.ScanWithProgressAndTreeAsync(root, options, cancellationToken).GetAwaiter().GetResult();
 
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();

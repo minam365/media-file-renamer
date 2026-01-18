@@ -22,7 +22,7 @@ public static class SpectreFileScan
         var dirNodes = new ConcurrentDictionary<string, TreeNode>();
 
         // two-pass: pre-scan for accurate file count
-        var totalFiles = CountFilesForScan(root, options.MinFileSizeInBytes, options.SearchPattern, options.OnError);
+        var totalFiles = CountFilesForScan(root, options.MinFileSizeInBytes, options.SearchPattern, options.Recursive, options.OnError);
         if (totalFiles == 0)
             totalFiles = 1; // avoid division by zero
 
@@ -123,7 +123,7 @@ public static class SpectreFileScan
         return results.ToList();
     }
 
-    private static long CountFilesForScan(DirectoryInfo root, long minSize, string searchPattern, Action<Exception>? onError)
+    public static long CountFilesForScan(DirectoryInfo root, long minSize, string searchPattern, bool recursive, Action<Exception>? onError)
     {
         long count = 0;
 
@@ -159,8 +159,12 @@ public static class SpectreFileScan
                 }
             }
 
-            foreach (var dir in SafeDirs())
-                stack.Push(dir);
+            // Only enqueue subdirectories when recursive is true
+            if (recursive)
+            {
+                foreach (var dir in SafeDirs())
+                    stack.Push(dir);
+            }
         }
 
         return count;

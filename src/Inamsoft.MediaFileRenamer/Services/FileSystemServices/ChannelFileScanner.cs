@@ -46,8 +46,12 @@ public static class ChannelFileScanner
                                     await fileChannel.Writer.WriteAsync(file, cancellationToken);
                             }
 
-                            foreach (var sub in SafeDirs())
-                                await dirChannel.Writer.WriteAsync(sub, cancellationToken);
+                            // Only enqueue subdirectories when recursive scan requested
+                            if (options.Recursive)
+                            {
+                                foreach (var sub in SafeDirs())
+                                    await dirChannel.Writer.WriteAsync(sub, cancellationToken);
+                            }
                         }
                     }, cancellationToken));
 
