@@ -7,11 +7,11 @@ namespace Inamsoft.MediaFileRenamer.Services.FileSystemServices;
 public static class FileScannerDashboard
 {
     public static async Task RunDashboardAsync(
-        string root,
-        ScanOptions options,
+        DirectoryInfo root,
+        FileScanOptions options,
         CancellationToken cancellationToken)
     {
-        var uiChannel = Channel.CreateUnbounded<FileScanEvent>();
+        var uiChannel = Channel.CreateUnbounded<FileScanResult>();
 
         // Start scanning in background
         var scanTask = Task.Run(async () =>
@@ -24,13 +24,23 @@ public static class FileScannerDashboard
             uiChannel.Writer.Complete();
         }, cancellationToken);
 
+        long totalFiles = 0;
+        AnsiConsole.Status()
+            .Start("Connecting to server...", ctx =>
+            {
+                totalFiles = SpectreFileScan.CountFilesForScan(root, options.MinFileSizeInBytes, options.SearchPattern, options.Recursive, options.OnError);
+            });
+
+        
+
         // UI elements
         var tree = new Tree($"[yellow]{root}[/]");
-        var progressPanel = CreateProgressPanel(0.0, 0, options.TotalFilesHint ?? 0);
+        var progressPanel = CreateProgressPanel(0.0, 0, totalFiles);
 
         var stats = new BreakdownChart()
             .AddItem("Processed", 0, Color.Green)
-            .AddItem("Remaining", options.TotalFilesHint ?? 0, Color.Grey);
+            .AddItem("Remaining", totalFiles, Color.Grey);
+
 
         var layout = new Layout()
             .SplitRows(
@@ -49,7 +59,6 @@ public static class FileScannerDashboard
             );
 
         long processed = 0;
-        long totalFiles = options.TotalFilesHint ?? 0;
         var stopwatch = Stopwatch.StartNew();
 
         await AnsiConsole.Live(layout)
@@ -68,12 +77,15 @@ public static class FileScannerDashboard
                     layout["progress"].Update(progressPanel);
 
                     // Update stats
-                    stats.Clear();
-                    stats.AddItem("Processed", processed, Color.Green);
-                    stats.AddItem("Remaining", Math.Max(0, totalFiles - processed), Color.Grey);
+                    //stats = new BreakdownChart()
+                    //        .AddItem("Processed", processed, Color.Green)
+                    //        .AddItem("Remaining", Math.Max(0, totalFiles - processed), Color.Grey);
 
-                    // Update tree
-                    AddFileToTree(tree, evt.FilePath);
+                    //// Update tree
+                    ////AddFileToTree(tree, evt.FilePath);
+                    //AnsiConsole.Write(stats);
+
+                    options.OnFileFound?.Invoke(evt);
 
                     ctx.Refresh();
                 }
@@ -105,29 +117,7 @@ public static class FileScannerDashboard
         return panel;
     }
 
-    private static void AddFileToTree(Tree tree, string filePath)
-    {
-        var parts = filePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        TreeNode current = tree.Root;
 
-        foreach (var part in parts.Where(p => !string.IsNullOrWhiteSpace(p)))
-        {
-            var existing = current.Children
-                .OfType<TreeNode>()
-                .FirstOrDefault(n => n.Title.Equals(part, StringComparison.OrdinalIgnoreCase));
-
-            if (existing is not null)
-            {
-                current = existing;
-            }
-            else
-            {
-                current = current.AddNode(part);
-            }
-        }
-    }
-
-    public sealed record FileScanEvent(string FilePath);
 }
 
 

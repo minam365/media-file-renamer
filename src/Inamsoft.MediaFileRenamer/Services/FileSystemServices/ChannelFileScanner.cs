@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using Spectre.Console;
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
 namespace Inamsoft.MediaFileRenamer.Services.FileSystemServices;
@@ -10,61 +11,74 @@ public static class ChannelFileScanner
         FileScanOptions options,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var dirChannel = Channel.CreateUnbounded<DirectoryInfo>();
         var fileChannel = Channel.CreateUnbounded<FileInfo>();
         var resultChannel = Channel.CreateUnbounded<FileScanResult>();
 
-        // PRODUCER: directory traversal
-        var dirProducer = Task.Run(async () =>
+        // PRODUCER: directory traversal (single producer, stack-based)
+        var producer = Task.Run(async () =>
         {
             try
             {
-                await dirChannel.Writer.WriteAsync(root, cancellationToken);
+                var stack = new Stack<DirectoryInfo>();
+                stack.Push(root);
 
-                var workers = Enumerable.Range(0, options.MaxDegreeOfParallelism)
-                    .Select(_ => Task.Run(async () =>
+                while (stack.Count > 0)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var dir = stack.Pop();
+                    options.OnDirectoryEntered?.Invoke(dir);
+
+                    IEnumerable<FileInfo> SafeFiles()
                     {
-                        await foreach (var dir in dirChannel.Reader.ReadAllAsync(cancellationToken))
+                        try { return dir.EnumerateFiles(options.SearchPattern); }
+                        catch (Exception ex) { options.OnError?.Invoke(ex); return Enumerable.Empty<FileInfo>(); }
+                    }
+
+                    IEnumerable<DirectoryInfo> SafeDirs()
+                    {
+                        try { return dir.EnumerateDirectories(); }
+                        catch (Exception ex) { options.OnError?.Invoke(ex); return Enumerable.Empty<DirectoryInfo>(); }
+                    }
+
+                    foreach (var file in SafeFiles())
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        try
                         {
-                            options.OnDirectoryEntered?.Invoke(dir);
-
-                            IEnumerable<FileInfo> SafeFiles()
-                            {
-                                try { return dir.EnumerateFiles(options.SearchPattern); }
-                                catch (Exception ex) { options.OnError?.Invoke(ex); return Enumerable.Empty<FileInfo>(); }
-                            }
-
-                            IEnumerable<DirectoryInfo> SafeDirs()
-                            {
-                                try { return dir.EnumerateDirectories(); }
-                                catch (Exception ex) { options.OnError?.Invoke(ex); return Enumerable.Empty<DirectoryInfo>(); }
-                            }
-
-                            foreach (var file in SafeFiles())
-                            {
-                                if (file.Length >= options.MinFileSizeInBytes)
-                                    await fileChannel.Writer.WriteAsync(file, cancellationToken);
-                            }
-
-                            // Only enqueue subdirectories when recursive scan requested
-                            if (options.Recursive)
-                            {
-                                foreach (var sub in SafeDirs())
-                                    await dirChannel.Writer.WriteAsync(sub, cancellationToken);
-                            }
+                            if (file.Length >= options.MinFileSizeInBytes)
+                                await fileChannel.Writer.WriteAsync(file, cancellationToken);
                         }
-                    }, cancellationToken));
+                        catch (Exception ex)
+                        {
+                            options.OnError?.Invoke(ex);
+                        }
+                    }
 
-                await Task.WhenAll(workers);
+                    if (options.Recursive)
+                    {
+                        foreach (var sub in SafeDirs())
+                        {
+                            stack.Push(sub);
+                        }
+                    }
+                }
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // respect cancellation — fall through to complete writer
+            }
+            catch (Exception ex)
+            {
+                options.OnError?.Invoke(ex);
             }
             finally
             {
-                dirChannel.Writer.TryComplete();
+                // Signal files done (consumers will complete)
                 fileChannel.Writer.TryComplete();
             }
         }, cancellationToken);
 
-        // CONSUMERS: file processing
+        // CONSUMERS: file processing (parallel)
         var fileConsumers = Enumerable.Range(0, options.MaxDegreeOfParallelism)
             .Select(_ => Task.Run(async () =>
             {
@@ -72,7 +86,7 @@ public static class ChannelFileScanner
                 {
                     try
                     {
-                        var mime = Utils.GetMimeType(file); 
+                        var mime = Utils.GetMimeType(file);
                         var icon = Utils.GetFileIcon(mime);
 
                         var result = new FileScanResult
@@ -108,11 +122,67 @@ public static class ChannelFileScanner
             resultChannel.Writer.TryComplete();
         }, cancellationToken);
 
-        // STREAM RESULTS
+        // STREAM RESULTS: yield to caller
         await foreach (var result in resultChannel.Reader.ReadAllAsync(cancellationToken))
             yield return result;
 
-        await dirProducer;
+        // Ensure producer/closer finished
+        await producer;
         await resultCloser;
     }
+
+    public static long CountFilesForScan(DirectoryInfo root, long minSize, string searchPattern, bool recursive, Action<Exception>? onError)
+    {
+        long count = 0;
+
+        var stack = new Stack<DirectoryInfo>();
+        stack.Push(root);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+
+            IEnumerable<FileInfo> SafeFiles()
+            {
+                try { return current.EnumerateFiles(searchPattern); }
+                catch (Exception ex) { onError?.Invoke(ex); return Enumerable.Empty<FileInfo>(); }
+            }
+
+            IEnumerable<DirectoryInfo> SafeDirs()
+            {
+                try { return current.EnumerateDirectories(); }
+                catch (Exception ex) { onError?.Invoke(ex); return Enumerable.Empty<DirectoryInfo>(); }
+            }
+
+            foreach (var file in SafeFiles())
+            {
+                try
+                {
+                    if (file.Length >= minSize)
+                        count++;
+
+                    if (count % 1000 == 0)
+                    {
+                        // yield to keep UI responsive
+                        Thread.Sleep(0);
+                        AnsiConsole.MarkupLine($"[grey]Scanned {count:N0} files...[/]");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    onError?.Invoke(ex);
+                }
+            }
+
+            // Only enqueue subdirectories when recursive is true
+            if (recursive)
+            {
+                foreach (var dir in SafeDirs())
+                    stack.Push(dir);
+            }
+        }
+
+        return count;
+    }
+
 }

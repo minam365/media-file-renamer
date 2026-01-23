@@ -152,6 +152,13 @@ public static class SpectreFileScan
                 {
                     if (file.Length >= minSize)
                         count++;
+
+                    if(count % 1000 == 0)
+                    {
+                        // yield to keep UI responsive
+                        Thread.Sleep(0);
+                        AnsiConsole.MarkupLine($"[grey]Scanned {count:N0} files...[/]");
+                    }
                 }
                 catch (Exception ex)
                 {

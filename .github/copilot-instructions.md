@@ -9,5 +9,5 @@
 - Follow naming conventions
 
 ## Project-Specific Rules
-- User prefers code modifications within the current codebase.
-- Add features by modifying existing options/parameters (e.g., adding a boolean flag to FileScanOptions). Remember to update all call sites.
+- User prefers modifications in-place and to add features by updating existing options/parameters (e.g., adding a boolean flag to FileScanOptions). Ensure changes are applied across the codebase and update all call sites when adding parameters.
+- Precompute counts before starting background tasks when performing scans to avoid concurrent disk access. Update call sites when changing options.

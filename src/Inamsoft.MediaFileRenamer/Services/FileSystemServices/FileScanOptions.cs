@@ -14,4 +14,6 @@ public record FileScanOptions
     public Action<Exception>? OnError { get; init; }
     public Action<DirectoryInfo>? OnDirectoryEntered { get; init; }
     public Action<FileScanResult>? OnFileFound { get; init; }
+
+    public Action<FileScanResult>? ProcessFile { get; init; }
 }

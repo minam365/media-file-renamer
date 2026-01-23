@@ -33,6 +33,33 @@ internal static class Utils
         [".xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         [".ppt"] = "application/vnd.ms-powerpoint",
         [".pptx"] = "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        [".dng"] = "image/x-adobe-dng",
+        [".cr2"] = "image/x-canon-cr2",
+        [".nef"] = "image/x-nikon-nef",
+        [".arw"] = "image/x-sony-arw",
+        [".rw2"] = "image/x-panasonic-rw2",
+        [".orf"] = "image/x-olympus-orf",
+        [".sr2"] = "image/x-sony-sr2",
+        [".heic"] = "image/heic",
+        [".mpv"] = "video/x-matroska",
+        [".flac"] = "audio/flac",
+        [".aac"] = "audio/aac",
+        [".mov"] = "video/quicktime",
+        [".avi"] = "video/x-msvideo",
+        [".wmv"] = "video/x-ms-wmv",
+        [".m4v"] = "video/x-m4v",
+        [".m2ts"] = "video/vnd.dlna.mpeg-tts",
+        [".m4a"] = "audio/mp4",
+        [".flv"] = "video/x-flv",
+        [".svg"] = "image/svg+xml",
+        [".ico"] = "image/vnd.microsoft.icon",
+        [".tiff"] = "image/tiff",
+        [".tif"] = "image/tiff",
+        [".mpg"] = "video/mpeg",
+        [".mpeg"] = "video/mpeg",
+        [".ogg"] = "audio/ogg",
+        [".ogv"] = "video/ogg"
+        
         // add more as needed
     };
 

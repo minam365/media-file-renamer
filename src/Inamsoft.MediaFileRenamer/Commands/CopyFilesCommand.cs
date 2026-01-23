@@ -16,7 +16,7 @@ internal class CopyFilesCommand : Command<FileActionSettings>
                 SourceFilePattern = settings.SourceFilePattern,
                 Recursive = settings.Recursive,
                 OverwriteExistingFiles = settings.Overwrite,
-                FilePrefix = settings.FilePrefix
+                FilePrefix = settings.FilePrefix                 
             };
             //var result = mediaFileHelper.RichCopyFiles(request);
 
@@ -24,13 +24,34 @@ internal class CopyFilesCommand : Command<FileActionSettings>
 
             var options = new FileScanOptions
             {
-                MinFileSizeInBytes = 3072,
+                MinFileSizeInBytes = settings.MinFileSizeInBytes,
                 SearchPattern = request.SourceFilePattern,
+                Recursive = settings.Recursive,
                 MaxDegreeOfParallelism = Environment.ProcessorCount,
-                ComputeSha256 = true,
-                OnError = ex => AnsiConsole.MarkupLine($"[red]Error:[/] {ex.Message}")
+                ComputeSha256 = false,
+                OnError = ex => AnsiConsole.MarkupLine($"[red]Error:[/] {ex.Message}"),
+                OnDirectoryEntered = dir => AnsiConsole.MarkupLine($"[blue]Entering directory:[/] {dir.FullName}"),
+                OnFileFound = fileScanResult =>
+                {
+                    AnsiConsole.MarkupLine($"[green]Renaming and copying file:[/] {fileScanResult.Icon} {fileScanResult.File.FullName}");
+                },
+                ProcessFile = fileScanResult =>
+                {
+                    // Here you can implement the logic to rename and copy the file
+                    var relativePath = Path.GetRelativePath(root.FullName, fileScanResult.File.FullName);
+                    var targetFilePath = Path.Combine(request.TargetFolderPath, fileScanResult.File.Name);
+                    // Ensure the target directory exists
+                    var targetDirectory = Path.GetDirectoryName(targetFilePath);
+                    if (targetDirectory != null && !Directory.Exists(targetDirectory))
+                    {
+                        Directory.CreateDirectory(targetDirectory);
+                    }
+                    // Copy the file
+                    fileScanResult.File.CopyTo(targetFilePath, request.OverwriteExistingFiles);
+                }
             };
-            var result = SpectreFileScan.ScanWithProgressAndTreeAsync(root, options, cancellationToken).GetAwaiter().GetResult();
+            //var result = SpectreFileScan.ScanWithProgressAndTreeAsync(root, options, cancellationToken).GetAwaiter().GetResult();
+            CleanFileScanner.RunDashboardAsync(root, options, cancellationToken).GetAwaiter().GetResult();
 
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine();
