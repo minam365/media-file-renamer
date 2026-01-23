@@ -12,8 +12,10 @@ namespace Inamsoft.Libs.MetadataProviders.Abstractions;
 [GenerateDictionary()]
 public partial record VideoFileMetadata
 {
-    public string? TrackId { get; set; }
-    public string? TrackDuration { get; set; }
+    /// <summary>
+    /// Gets or sets the duration of the video.
+    /// </summary>
+    public TimeSpan? Duration { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time when the video file was created.
@@ -51,6 +53,9 @@ public partial record VideoFileMetadata
     /// </remarks>
     public int? Width { get; set; } = null;
         
+    /// <summary>
+    /// Gets the metadata associated with the file.
+    /// </summary>
     public required FileMetadata FileMetadata { get; init; }
         
 }

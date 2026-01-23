@@ -1,5 +1,6 @@
-﻿using CommunityToolkit.Diagnostics;
-using Inamsoft.Libs.MetadataProviders.Abstractions;
+﻿using Inamsoft.Libs.MetadataProviders.Abstractions;
+using Inamsoft.Libs.MetadataProviders.Extensions;
+using MetadataExtractor;
 using Microsoft.Extensions.Logging;
 
 namespace Inamsoft.Libs.MetadataProviders;
@@ -14,33 +15,43 @@ public abstract class BaseMetadataProvider<TMetadataProvider>
     }
 
 
-    protected virtual FileMetadata GetFileMetadata(string filePath)
+    protected bool TryReadMetadata(string filePath, out GetMetadataResult result)
     {
-        Logger.LogInformation("Getting info for file: {FilePath}", filePath);
-
-        Guard.IsNotNullOrWhiteSpace(filePath, nameof(filePath));
-
-        FileInfo fileInfo = new(filePath);
-        var metadata = new FileMetadata(fileInfo)
+        try
         {
-            FilePath = fileInfo.FullName,
-            FileName = fileInfo.Name,
-            FileNameWithoutExtension = Path.GetFileNameWithoutExtension(filePath),
-            FileExtension = fileInfo.Extension,
-            DirectoryPath = fileInfo.DirectoryName ?? string.Empty,    
-            Exists = fileInfo.Exists
-        };
+            var directories = ImageMetadataReader.ReadMetadata(filePath);
+            result = new GetMetadataResult(directories);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            //Logger.LogError(ex, "Failed to read metadata tags from file: {FilePath}", filePath);
+            result = new GetMetadataResult();
+            return false;
+        }
+    }
 
-        if (!fileInfo.Exists) 
-            return metadata;
+    public readonly record struct GetMetadataResult
+    {
+        static readonly IReadOnlyList<MetadataTag> EmptyMetadataTags = [];
+        static readonly Dictionary<string, IReadOnlyList<MetadataTag>> EmptyDirectoryToTagsMap = [];
 
-        metadata.DirectoryName = fileInfo.DirectoryName ?? string.Empty;
+        public GetMetadataResult()
+        {
+            Directories = [];
+        }
 
-        metadata.CreatedAt = fileInfo.CreationTime;
-        metadata.ModifiedAt = fileInfo.LastWriteTime;
+        public GetMetadataResult(IReadOnlyList<MetadataExtractor.Directory>? directories) : this()
+        {
+            Directories = directories ?? [];
+        }
 
-        metadata.Length = fileInfo.Length;
-        
-        return metadata;
+        public IReadOnlyList<MetadataExtractor.Directory>? Directories { get; }
+
+        public IReadOnlyList<MetadataTag> MetadataTags 
+            => Directories is not null ? Directories.ToTagList() : EmptyMetadataTags;
+
+        public IReadOnlyDictionary<string, IReadOnlyList<MetadataTag>> DirectoryToTagsMap 
+            => Directories is not null ? Directories.ToTagDictionary() : EmptyDirectoryToTagsMap;
     }
 }

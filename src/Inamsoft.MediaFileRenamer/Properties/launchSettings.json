@@ -1,0 +1,20 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "Try Rename on inamnas3": {
+      "commandName": "Project",
+      "commandLineArgs": "copy \"\\\\INAMNAS3\\global_temp\\Shared Pictures\" \"\\\\INAMNAS3\\global_temp\\renamer-test\" -p=\"*.jpg\" -o=false -r=false"
+    },
+    "Run on wd_black": {
+      "commandName": "Project",
+      "commandLineArgs": "copy \"J:\\inamnas2-wddrives\\photorec\\recup_dir.32\" \"J:\\inamnas2-wddrives\\photorec-sorted\" -p=\"*.jpg\" -o=true -r=true"
+    },
+    "Recursively Run on wd_black": {
+      "commandName": "Project",
+      "commandLineArgs": "copy \"J:\\inamnas2-wddrives\\photorec\" \"J:\\inamnas2-wddrives\\photorec-sorted\" -p=\"*.*\" -o=false -r=true"
+    }
+  }
+}

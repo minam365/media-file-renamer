@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <!-- Static assembly + file version -->
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+
+    <!-- Auto-increment InformationalVersion on every build -->
+    <InformationalVersion>1.1.$(Date:yyyyMMdd).$(Time:HHmmss)</InformationalVersion>
+  </PropertyGroup>
+</Project>
