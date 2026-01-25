@@ -9,6 +9,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>true</ImplicitUsings>
     <LangVersion>Latest</LangVersion>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,6 +18,12 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <!-- Do not include the generator as a lib dependency -->
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="bin\**" />
+    <EmbeddedResource Remove="bin\**" />
+    <None Remove="bin\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="bin\Debug\netstandard2.0\\Inamsoft.Libs.SourceGenerators.dll" />

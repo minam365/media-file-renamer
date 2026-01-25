@@ -11,10 +11,13 @@
     <PackageReference Include="Spectre.Console" Version="0.54.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
+    <PackageReference Include="TinyResult" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Inamsoft.Libs.MediaFileRenaming\Inamsoft.Libs.MediaFileRenaming.csproj" />
+    <ProjectReference Include="..\Inamsoft.Libs.SourceGenerators.Attributes\Inamsoft.Libs.SourceGenerators.Attributes.csproj" />
+    <ProjectReference Include="..\Inamsoft.Libs.SourceGenerators\Inamsoft.Libs.SourceGenerators.csproj" />
   </ItemGroup>
 
 </Project>

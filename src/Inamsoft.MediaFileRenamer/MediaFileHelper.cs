@@ -1,16 +1,49 @@
 ﻿using Inamsoft.Libs.MediaFileRenaming;
 using Inamsoft.Libs.MetadataProviders;
+using Inamsoft.MediaFileRenamer.Abstractions;
 using Inamsoft.MediaFileRenamer.Services;
+using Inamsoft.MediaFileRenamer.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console;
+using TinyResult;
+using TinyResult.Enums;
 
 namespace Inamsoft.MediaFileRenamer;
 
 
-internal class MediaFileHelper
+internal partial class MediaFileHelper
 {
+    #region Internals
+
+    internal record struct OperationStepInfo(FileOperationType OperationType, string StepName);
+
+    internal class OperationSteps
+    {
+        public static readonly OperationStepInfo[] RenameThenCopySteps =
+        [
+            new OperationStepInfo(FileOperationType.RenameThenCopy, "Analyze Source File"),
+            new OperationStepInfo(FileOperationType.RenameThenCopy, "Generate Target File Name"),
+            new OperationStepInfo(FileOperationType.RenameThenCopy, "Copy File to Target Location"),
+            new OperationStepInfo(FileOperationType.RenameThenCopy, "Verify Copied File"),
+        ];
+    }
+
+    #endregion
+
+
+    private static readonly Dictionary<string, string> ConsoleStrings = new(StringComparer.OrdinalIgnoreCase)
+    {
+        { $"{FileOperationType.RenameThenCopy}-Op", "JPEG Image" },
+        { ".jpeg", "JPEG Image" },
+        { ".png", "PNG Image" },
+        { ".mp4", "MP4 Video" },
+        { ".mov", "MOV Video" },
+        { ".avi", "AVI Video" },
+        { ".mkv", "MKV Video" }
+    };
+
     private readonly IServiceProvider _serviceProvider;
 
     public IServiceProvider ServiceProvider => _serviceProvider;
@@ -40,6 +73,18 @@ internal class MediaFileHelper
 
         _serviceProvider = host.Services;
 
+    }
+
+    public Result<RenameFileResult> RenameThenCopyFile(FileScanResult sourceFileInfo, RenameFileSettings fileNamingServiceSettings)
+    {
+        ReportOperationInfo(sourceFileInfo, fileNamingServiceSettings, FileOperationType.RenameThenCopy);
+
+        return Result<RenameFileResult>.Failure(ErrorCode.Unknown, "ERROR");
+    }
+
+    private void ReportOperationInfo(FileScanResult sourceFileInfo, RenameFileSettings fileNamingServiceSettings, FileOperationType renameThenCopy)
+    {
+        throw new NotImplementedException();
     }
 
     public FileActionResult RichCopyFiles(FileRenameActionRequest request)
@@ -303,6 +348,8 @@ internal class MediaFileHelper
         }
         return new FileActionResult(succeededCount, failedCount);
     }
+
+
     
     private static FileInfo[] GetSourceMediaFiles(string sourceFolderPath, string sourceFilePattern, bool recursive)
     {

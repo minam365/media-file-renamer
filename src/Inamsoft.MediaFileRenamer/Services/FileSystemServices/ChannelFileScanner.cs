@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using Inamsoft.MediaFileRenamer.Services.Abstractions;
+using Spectre.Console;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 

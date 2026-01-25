@@ -1,4 +1,6 @@
-﻿namespace Inamsoft.MediaFileRenamer.Services.FileSystemServices;
+﻿using Inamsoft.MediaFileRenamer.Services.Abstractions;
+
+namespace Inamsoft.MediaFileRenamer.Services.FileSystemServices;
 
 public record FileScanOptions
 {

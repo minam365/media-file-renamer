@@ -16,6 +16,38 @@ namespace Inamsoft.Libs.MediaFileRenaming.Tests
         }
 
         [Fact]
+        public void RenameFile_FileExists_ReturnsExpectedFilePath_iPhone13()
+        {
+            // Arrange
+            var filePath = @"..\..\..\..\..\assets\media-files\20251119_110721068_iOS.jpg";
+            var canonicalFilePath = Path.GetFullPath(filePath);
+            var fileInfo = new FileInfo(filePath);
+            var tempFolderPath = Path.GetTempPath();
+            var expectedTargetFilePath = Path.Combine(tempFolderPath, "2025", "11. November", "20251119_120721_(Apple iPhone 13)_(4032x3024)_20251119_110721068_iOS.jpg");
+            var renameFileRequest = new RenameFileRequest(canonicalFilePath)
+            {
+                LastModified = fileInfo.LastWriteTimeUtc,
+                CreatedOn = fileInfo.CreationTimeUtc
+            };
+            var renameFileSettings = new RenameFileSettings
+            {
+                 TargetFileNamePrefix = null,
+                 TargetFolderPath = tempFolderPath,
+                 EnsureUniqueFileNames = false
+            };
+
+            // Act
+            var result = FileNamingService.RenameFile(renameFileRequest, renameFileSettings);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(renameFileRequest, result.SourceFile);
+            Assert.Equal(Path.GetFileName(expectedTargetFilePath), result.Name);
+            Assert.Equal(expectedTargetFilePath, result.FullName);
+        }
+
+
+        [Fact]
         public void GetTargetFilePath_FileExists_ReturnsExpectedFilePath_iPhone13()
         {
             // Arrange

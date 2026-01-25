@@ -27,7 +27,8 @@ public class FileNamingService : IFileNamingService
         ".cr2",
         ".rw2",
         ".mpo",
-        ".psd"
+        ".psd",
+        ".sr2"
     };
 
     private static readonly HashSet<string> _supportedVideoFileExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -65,6 +66,21 @@ public class FileNamingService : IFileNamingService
     public static bool IsSupportedMediaFileExtension(string fileExtension)
     {
         return IsSupportedPhotoFileExtension(fileExtension) || IsSupportedVideoFileExtension(fileExtension);
+    }
+
+    /// <inheritdoc/>
+    public RenameFileResult RenameFile(RenameFileRequest renameFileRequest, RenameFileSettings settings)
+    {
+        var targetFilePath = settings.EnsureUniqueFileNames ? 
+            MakeUniqueTargetFilePath(renameFileRequest.FullName, settings.TargetFolderPath, settings.TargetFileNamePrefix) :
+            GetTargetFilePath(renameFileRequest.FullName, settings.TargetFolderPath, settings.TargetFileNamePrefix);
+
+        return new RenameFileResult
+        {
+            SourceFile = renameFileRequest,
+            Name = Path.GetFileName(targetFilePath),
+            FullName = targetFilePath
+        };
     }
 
     /// <inheritdoc/>
