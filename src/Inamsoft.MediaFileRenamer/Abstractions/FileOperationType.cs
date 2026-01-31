@@ -1,6 +1,6 @@
 ﻿using Inamsoft.Libs.SourceGenerators.Attributes;
 
-namespace Inamsoft.MediaFileRenamer.Abstractions;
+namespace Inamsoft.MediaFileRenamer.Services.Abstractions;
 
 public enum FileOperationType
 {

@@ -7,4 +7,10 @@ namespace Inamsoft.Libs.SourceGenerators.Attributes
     {
         
     }
+
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
+    public sealed class GenerateConstantsFromEnumsAttribute : Attribute
+    {
+ 
+    }
 }

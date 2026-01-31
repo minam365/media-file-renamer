@@ -10,5 +10,6 @@
   <Project Path="src/Inamsoft.Libs.SourceGenerators.Attributes/Inamsoft.Libs.SourceGenerators.Attributes.csproj" Id="77d1ccb6-7d45-40db-8c4e-5846890b0790" />
   <Project Path="src/Inamsoft.Libs.SourceGenerators.Tests/Inamsoft.Libs.SourceGenerators.Tests.csproj" Id="6407cf1b-3842-4b1c-bbc2-94415308b459" />
   <Project Path="src/Inamsoft.Libs.SourceGenerators/Inamsoft.Libs.SourceGenerators.csproj" Id="422ad5de-bbed-4ffe-b086-15417f829fcc" />
+  <Project Path="src/Inamsoft.MediaFileRenamer.Services/Inamsoft.MediaFileRenamer.Services.csproj" Id="880ca2bf-03a2-4160-8d8b-75291da9f1de" />
   <Project Path="src/Inamsoft.MediaFileRenamer/Inamsoft.MediaFileRenamer.csproj" />
 </Solution>

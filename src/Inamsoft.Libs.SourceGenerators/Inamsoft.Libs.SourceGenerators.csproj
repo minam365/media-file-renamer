@@ -19,20 +19,10 @@
     <!-- Do not include the generator as a lib dependency -->
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="bin\**" />
-    <EmbeddedResource Remove="bin\**" />
-    <None Remove="bin\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="bin\Debug\netstandard2.0\\Inamsoft.Libs.SourceGenerators.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Package the generator in the analyzer directory of the nuget package -->
+  <!--<ItemGroup>
+    --><!-- Package the generator in the analyzer directory of the nuget package --><!--
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-  </ItemGroup>
+  </ItemGroup>-->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0">
       <PrivateAssets>all</PrivateAssets>
