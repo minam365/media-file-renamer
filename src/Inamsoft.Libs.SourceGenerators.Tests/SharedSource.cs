@@ -7,7 +7,7 @@ namespace Inamsoft.Libs.SourceGenerators.Tests;
 public static class SharedSource
 {
     public const string AttributeSource = @"
-namespace FileOpsGen
+namespace Inamsoft.Libs.SourceGenerators.Attributes
 {
     [System.AttributeUsage(System.AttributeTargets.Field)]
     public sealed class OperationTemplateAttribute : System.Attribute
@@ -26,9 +26,41 @@ namespace FileOpsGen
 ";
 
     public const string OperationStepSource = @"
-namespace FileOpsGen
+using Inamsoft.Libs.SourceGenerators.Attributes;
+
+namespace Inamsoft.MediaFileRenamer.Abstractions;
+
+/// <summary>
+/// 
+/// </summary>
+public enum FileOperationType
 {
-    public enum OperationStep { Begin, Finished, Skipped, Retrying, Failed }
+    [OperationTemplate(""listing files"")]
+    List,
+
+    [OperationTemplate(""copying file {fileName} from {source} to {destination}"")]
+    Copy,
+
+    [OperationTemplate(""moving file {fileName} from {source} to {destination}"")]
+    Move,
+
+    [OperationTemplate(""copying {fileCount} files from {source} to {destination}"")]
+    CopyFiles,
+
+    [OperationTemplate(""moving {fileCount} files from {source} to {destination}"")]
+    MoveFiles,
+
+    [OperationTemplate(""renaming file {fileName} then copying to {destination}"")]
+    RenameThenCopy,
+
+    [OperationTemplate(""renaming then copying {fileCount} files"")]
+    RenameThenCopyFiles,
+
+    [OperationTemplate(""renaming file {fileName} then moving to {destination}"", required: ""fileName, destination"")]
+    RenameThenMove,
+
+    [OperationTemplate(""renaming then moving {fileCount} files"", required: ""fileCount"")]
+    RenameThenMoveFiles
 }
 ";
 }

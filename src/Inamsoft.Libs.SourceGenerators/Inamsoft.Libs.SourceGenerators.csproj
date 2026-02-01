@@ -3,24 +3,32 @@
   <PropertyGroup>
     <!-- 👇 Source generators must target netstandard 2.0 -->
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
     <!-- 👇 We don't want to reference the source generator dll directly in consuming projects -->
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <!-- 👇 New project, why not! -->
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>true</ImplicitUsings>
-    <LangVersion>Latest</LangVersion>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <OutputItemType>Analyzer</OutputItemType>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!--<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>-->
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <!-- Generates a package at build -->
+    -->
+  <!-- Generates a package at build -->
+  <!--
     <IncludeBuildOutput>false</IncludeBuildOutput>
-    <!-- Do not include the generator as a lib dependency -->
-  </PropertyGroup>
+    -->
+  <!-- Do not include the generator as a lib dependency -->
+  <!--
+  </PropertyGroup>-->
 
   <!--<ItemGroup>
-    --><!-- Package the generator in the analyzer directory of the nuget package --><!--
+    -->
+  <!-- Package the generator in the analyzer directory of the nuget package -->
+  <!--
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>-->
   <ItemGroup>

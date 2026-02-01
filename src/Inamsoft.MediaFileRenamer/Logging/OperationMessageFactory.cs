@@ -1,4 +1,5 @@
-﻿using Inamsoft.MediaFileRenamer.Abstractions;
+﻿using Inamsoft.Libs.MetadataProviders.Abstractions;
+using Inamsoft.MediaFileRenamer.Abstractions;
 using static Inamsoft.MediaFileRenamer.MediaFileHelper;
 
 namespace Inamsoft.MediaFileRenamer.Logging;

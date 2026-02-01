@@ -1,4 +1,4 @@
-﻿using Inamsoft.MediaFileRenamer.Abstractions;
+﻿using Inamsoft.Libs.MetadataProviders.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Text;
