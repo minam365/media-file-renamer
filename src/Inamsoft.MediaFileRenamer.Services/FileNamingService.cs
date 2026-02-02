@@ -3,7 +3,7 @@ using Inamsoft.Libs.MetadataProviders.Abstractions;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Inamsoft.Libs.MediaFileRenaming;
+namespace Inamsoft.MediaFileRenamer.Services;
 
 public class FileNamingService : IFileNamingService
 {

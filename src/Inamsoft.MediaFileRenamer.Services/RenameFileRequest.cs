@@ -1,4 +1,4 @@
-﻿namespace Inamsoft.Libs.MediaFileRenaming;
+﻿namespace Inamsoft.MediaFileRenamer.Services;
 
 /// <summary>
 /// A container for information about a source file to be renamed.

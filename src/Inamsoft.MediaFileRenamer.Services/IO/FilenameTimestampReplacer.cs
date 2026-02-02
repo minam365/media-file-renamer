@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 
 
-namespace Inamsoft.Libs.MediaFileRenaming;
+namespace Inamsoft.MediaFileRenamer.Services.IO;
 
 
 public static class FilenameTimestampReplacer

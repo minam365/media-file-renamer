@@ -1,4 +1,4 @@
-﻿namespace Inamsoft.Libs.MediaFileRenaming;
+﻿namespace Inamsoft.MediaFileRenamer.Services;
 
 public record RenameFileSettings
 {

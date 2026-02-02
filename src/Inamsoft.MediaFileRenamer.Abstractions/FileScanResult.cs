@@ -1,4 +1,4 @@
-﻿namespace Inamsoft.MediaFileRenamer.Services.Abstractions;
+﻿namespace Inamsoft.MediaFileRenamer.Abstractions;
 
 public sealed class FileScanResult
 {

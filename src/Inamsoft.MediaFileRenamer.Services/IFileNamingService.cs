@@ -1,6 +1,6 @@
 ﻿using Inamsoft.Libs.MetadataProviders.Abstractions;
 
-namespace Inamsoft.Libs.MediaFileRenaming;
+namespace Inamsoft.MediaFileRenamer.Services;
 
 public interface IFileNamingService
 {

@@ -1,10 +1,4 @@
-﻿using Inamsoft.Libs.MetadataProviders.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using static Inamsoft.MediaFileRenamer.MediaFileHelper;
-
-namespace Inamsoft.MediaFileRenamer;
+﻿namespace Inamsoft.MediaFileRenamer.Abstractions;
 
 internal static class ConsoleWriter
 {
