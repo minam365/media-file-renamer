@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Inamsoft.Libs.MediaFileRenaming\Inamsoft.Libs.MediaFileRenaming.csproj" />
     <ProjectReference Include="..\Inamsoft.Libs.SourceGenerators.Attributes\Inamsoft.Libs.SourceGenerators.Attributes.csproj" />
     <ProjectReference Include="..\Inamsoft.Libs.SourceGenerators\Inamsoft.Libs.SourceGenerators.csproj" />
     <ProjectReference Include="..\Inamsoft.MediaFileRenamer.Abstractions\Inamsoft.MediaFileRenamer.Abstractions.csproj" />

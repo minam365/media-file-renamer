@@ -1,4 +1,5 @@
-﻿using Inamsoft.MediaFileRenamer.Services.IO.Logging;
+﻿using Inamsoft.MediaFileRenamer.Services.FileRenamers;
+using Inamsoft.MediaFileRenamer.Services.IO.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;

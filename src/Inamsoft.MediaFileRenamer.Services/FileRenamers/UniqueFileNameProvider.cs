@@ -1,6 +1,6 @@
 ﻿using Inamsoft.MediaFileRenamer.Services.IO.Logging;
 
-namespace Inamsoft.MediaFileRenamer.Services.IO;
+namespace Inamsoft.MediaFileRenamer.Services.FileRenamers;
 
 public static class UniqueFileNameProvider
 {

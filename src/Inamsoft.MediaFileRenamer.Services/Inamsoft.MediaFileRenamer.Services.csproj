@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="TinyResult" Version="1.0.1" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <ProjectReference Include="..\Inamsoft.Libs.MetadataProviders\Inamsoft.Libs.MetadataProviders.csproj" />
     <ProjectReference Include="..\Inamsoft.Libs.SourceGenerators.Attributes\Inamsoft.Libs.SourceGenerators.Attributes.csproj" />
     <ProjectReference Include="..\Inamsoft.MediaFileRenamer.Abstractions\Inamsoft.MediaFileRenamer.Abstractions.csproj" />
