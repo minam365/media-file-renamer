@@ -14,7 +14,7 @@ public static class VideoFileRenamer
             // Add more rules here (sanitization, uniqueness, etc.)
         });
 
-        var context = new RenamingContext(file, FileNameTimestampHelper.TryParseTimestampFromName);
+        var context = new RenamingContext(file, TimestampHelper.TryParseTimestampFromName);
 
         return pipeline.Execute(context);
     }

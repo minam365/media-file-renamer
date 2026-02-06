@@ -1,9 +1,9 @@
 ﻿using MetadataExtractor;
+using MetadataExtractor.Formats.Avi;
 using MetadataExtractor.Formats.Exif;
-using MetadataExtractor.Formats.Mpeg;
+using MetadataExtractor.Formats.Png;
 using MetadataExtractor.Formats.QuickTime;
 using MetadataExtractor.Formats.Xmp;
-using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -11,7 +11,7 @@ using System.Text.RegularExpressions;
 namespace Inamsoft.MediaFileRenamer.Services.FileRenamers;
 
 
-public static partial class FileNameTimestampHelper
+public static partial class TimestampHelper
 {
     // Regex matches both timestamp formats:
     // 1) yyyyddmm_hhmmss
@@ -250,6 +250,85 @@ public static partial class FileNameTimestampHelper
         return null;
     }
 
+    private static DateTime? TryPngMetadata(FileInfo file, TimestampResult result)
+    {
+        if (!file.Extension.Equals(".png", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        try
+        {
+            var directories = ImageMetadataReader.ReadMetadata(file.FullName);
+            var png = directories.OfType<PngDirectory>().FirstOrDefault();
+
+            if (png != null &&
+                png.TryGetDateTime(PngDirectory.TagLastModificationTime, out var dt))
+            {
+                DiagnosticLoggingHelper.Log(result, "PNG metadata timestamp found");
+                return dt;
+            }
+        }
+        catch
+        {
+            DiagnosticLoggingHelper.Log(result, "PNG metadata read failed");
+        }
+
+        return null;
+    }
+
+    private static DateTime? TryWmvMetadata(FileInfo file, TimestampResult result)
+    {
+        var ext = file.Extension.ToLowerInvariant();
+        if (ext is not ".wmv" and not ".asf")
+            return null;
+
+        try
+        {
+            var directories = ImageMetadataReader.ReadMetadata(file.FullName);
+            var asf = directories.OfType<AsfDirectory>().FirstOrDefault();
+
+            if (asf != null &&
+                asf.TryGetDateTime(AsfDirectory.TagCreationDate, out var dt))
+            {
+                DiagnosticLoggingHelper.Log(result, "WMV/ASF metadata timestamp found");
+                return dt;
+            }
+        }
+        catch
+        {
+            DiagnosticLoggingHelper.Log(result, "WMV/ASF metadata read failed");
+        }
+
+        return null;
+    }
+
+    private static DateTime? TryPsdMetadata(FileInfo file, TimestampResult result)
+    {
+        if (!file.Extension.Equals(".psd", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        try
+        {
+            var directories = ImageMetadataReader.ReadMetadata(file.FullName);
+            var xmp = directories.OfType<XmpDirectory>().FirstOrDefault();
+
+            if (xmp?.XmpMeta != null)
+            {
+                var dto = xmp.XmpMeta.GetPropertyDate("http://ns.adobe.com/xap/1.0/", "CreateDate");
+                if (dto != null)
+                {
+                    DiagnosticLoggingHelper.Log(result, "PSD XMP CreateDate found");
+                    return dto.HasDate ? new DateTime(dto.Year, dto.Month, dto.Day, dto.Hour, dto.Minute, dto.Second, DateTimeKind.Utc) : null;
+                }
+            }
+        }
+        catch
+        {
+            DiagnosticLoggingHelper.Log(result, "PSD metadata read failed");
+        }
+
+        return null;
+    }
+
     public static DateTime? TryGenericTimestamp(string name)
     {
         var match = GenericTimestampMatchPattern().Match(name);
@@ -322,9 +401,55 @@ public static partial class FileNameTimestampHelper
         return null;
     }
 
-    public static DateTime? ExtractTimestamp(FileInfo file)
+    public static TimestampResult ExtractTimestamp(FileInfo file)
     {
-        string name = Path.GetFileNameWithoutExtension(file.Name);
+        var result = new TimestampResult
+        {
+            OriginalName = Path.GetFileNameWithoutExtension(file.Name)
+        };
+
+        string name = result.OriginalName;
+
+        DateTime? ts =
+            // 1. Camera-specific heuristics
+            TryCanonPattern(name, result) ??
+            TrySmartphonePattern(name, result) ??
+            TryNikonPattern(name, result) ??
+
+            // 2. Generic patterns
+            TryGenericTimestamp(name, result) ??
+            TryEmbeddedTimestamp(name, result) ??
+            TryEpochMilliseconds(name, result) ??
+            TryEpochSeconds(name, result) ??
+
+            // 3. AVCHD (.MTS / .M2TS)
+            TryAvchdTimestamp(file) ??
+            TryAvchdTimestamp(file, result) ??
+
+            // 4.Video metadata (MP4/MOV)
+            TryVideoMetadata(file, result) ??
+            TryPngMetadata(file, result) ??
+            TryWmvMetadata(file, result) ??
+
+            // 5. EXIF fallback (photos only)
+             (IsPhoto(file) ? TryExifTimestamp(file, result) : null) ??
+
+        // 6. PSD metadata
+        TryPsdMetadata(file, result);
+
+        if (ts != null)
+        {
+            result.ResultingTimestamp = ts;
+            return result;
+        }
+
+        // Fallback
+        result.ResultingTimestamp = file.LastWriteTime;
+        result.Source = TimestampSource.FileSystemModifiedDate;
+        Log(result, "Falling back to file system modified date");
+
+        return result;
+
 
         // 1. Camera-specific heuristics
         return
@@ -340,13 +465,16 @@ public static partial class FileNameTimestampHelper
             TryEpochMilliseconds(name) ??
             TryEpochSeconds(name) ??
 
-            // 3.Video metadata
+            // 3. AVCHD (.MTS / .M2TS)
+            TryAvchdTimestamp(file) ??
+
+            // 4.Video metadata (MP4/MOV)
             (IsVideo(file) ? TryVideoMetadata(file) : null) ??
 
-            // 4. EXIF fallback (photos only)
+            // 5. EXIF fallback (photos only)
             (IsPhoto(file) ? TryExifTimestamp(file) : null) ??
 
-            // 5. Sidecar files
+            // 6. Sidecar files
             TrySidecars(file);
 
     }
@@ -357,26 +485,34 @@ public static partial class FileNameTimestampHelper
         {
             var directories = ImageMetadataReader.ReadMetadata(file.FullName);
 
-            // QuickTime (MOV, MP4)
-            var qt = directories.OfType<QuickTimeMovieHeaderDirectory>().FirstOrDefault();
-            if (qt != null)
+            // QuickTime Movie Header (most reliable)
+            var movie = directories.OfType<QuickTimeMovieHeaderDirectory>().FirstOrDefault();
+            if (movie != null)
             {
-                if (qt.TryGetDateTime(QuickTimeMovieHeaderDirectory.TagCreated, out var created))
+                if (movie.TryGetDateTime(QuickTimeMovieHeaderDirectory.TagCreated, out var created))
                     return created;
 
-                if (qt.TryGetDateTime(QuickTimeMovieHeaderDirectory.TagModified, out var modified))
+                if (movie.TryGetDateTime(QuickTimeMovieHeaderDirectory.TagModified, out var modified))
                     return modified;
             }
 
-            // MP4
-            var mp4 = directories.OfType<>().FirstOrDefault();
-            if (mp4 != null)
+            // QuickTime Track Header (sometimes more accurate)
+            var track = directories.OfType<QuickTimeTrackHeaderDirectory>().FirstOrDefault();
+            if (track != null)
             {
-                if (mp4.TryGetDateTime(Mp3Directory., out var created))
+                if (track.TryGetDateTime(QuickTimeTrackHeaderDirectory.TagCreated, out var created))
                     return created;
 
-                if (mp4.TryGetDateTime(Mp4Directory.TagModificationTime, out var modified))
+                if (track.TryGetDateTime(QuickTimeTrackHeaderDirectory.TagModified, out var modified))
                     return modified;
+            }
+
+            // QuickTime Metadata Header (rare but valid)
+            var meta = directories.OfType<QuickTimeMetadataHeaderDirectory>().FirstOrDefault();
+            if (meta != null)
+            {
+                if (meta.TryGetDateTime(QuickTimeMetadataHeaderDirectory.TagCreationDate, out var created))
+                    return created;
             }
         }
         catch
@@ -431,6 +567,73 @@ public static partial class FileNameTimestampHelper
         return null;
     }
 
+    private static DateTime? TryAvchdCpiSidecar(FileInfo mtsFile)
+    {
+        var cpiPath = Path.ChangeExtension(mtsFile.FullName, ".CPI");
+        if (!File.Exists(cpiPath))
+            return null;
+
+        try
+        {
+            var bytes = File.ReadAllBytes(cpiPath);
+
+            // Timestamp offset in CPI (bytes 0x60–0x63)
+            const int offset = 0x60;
+
+            if (bytes.Length < offset + 4)
+                return null;
+
+            uint seconds = BitConverter.ToUInt32(bytes, offset);
+
+            // AVCHD epoch: 2006-01-01
+            var epoch = new DateTime(2006, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            return epoch.AddSeconds(seconds).ToLocalTime();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static DateTime? TryAvchdMplSidecar(FileInfo mtsFile)
+    {
+        var mplPath = Path.ChangeExtension(mtsFile.FullName, ".MPL");
+        if (!File.Exists(mplPath))
+            return null;
+
+        try
+        {
+            var bytes = File.ReadAllBytes(mplPath);
+
+            // Timestamp offset in MPL (bytes 0x50–0x53)
+            const int offset = 0x50;
+
+            if (bytes.Length < offset + 4)
+                return null;
+
+            uint seconds = BitConverter.ToUInt32(bytes, offset);
+
+            var epoch = new DateTime(2006, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            return epoch.AddSeconds(seconds).ToLocalTime();
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static DateTime? TryAvchdTimestamp(FileInfo file)
+    {
+        if (!IsMts(file))
+            return null;
+
+        return
+            TryAvchdCpiSidecar(file) ??
+            TryAvchdMplSidecar(file);
+    }
+
     private static DateTime? TrySidecars(FileInfo file)
     {
         return
@@ -449,6 +652,12 @@ public static partial class FileNameTimestampHelper
     {
         var ext = file.Extension.ToLowerInvariant();
         return ext is ".mp4" or ".mov" or ".avi" or ".mkv" or ".3gp" or ".wmv" or ".m4v";
+    }
+
+    private static bool IsMts(FileInfo file)
+    {
+        var ext = file.Extension.ToLowerInvariant();
+        return ext is ".mts" or ".m2ts";
     }
 
     [GeneratedRegex(@"DSC_\d{4}")]
