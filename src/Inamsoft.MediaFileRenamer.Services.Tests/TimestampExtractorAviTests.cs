@@ -2,17 +2,17 @@
 
 namespace Inamsoft.MediaFileRenamer.Services.Tests;
 
-public class FilenamePatternTests
+public class TimestampExtractorAviTests
 {
     [Fact]
-    public void ExtractTimestamp_FilenamePrefixTimestamp_ReturnsCorrectTimestamp()
+    public void ExtractTimestamp_Avi_FallsBackToLastModified()
     {
-        var file = TestFileHelper.GetVideo("20170304_191830.mp4");
+        var file = TestFileHelper.GetVideo("DSCF0007.AVI");
 
         var found = TimestampExtractor.TryExtractTimestamp(file, out var timestamp);
-
+        
         Assert.True(found);
         Assert.NotNull(timestamp);
-        Assert.Equal(new DateTime(2017, 3, 4, 19, 18, 30), timestamp);
+        Assert.Equal(file.LastWriteTime, timestamp);
     }
 }

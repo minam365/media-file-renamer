@@ -42,25 +42,7 @@ public partial class TimestampExtractor
     {
         var request = new GetFileTimestampRequest(file);
 
-        var tryResult = ResultPipeline<GetFileTimestampResponse>
-                .Start(Result<GetFileTimestampResponse>.Success(
-                    new GetFileTimestampResponse(DateTime.Now, TimestampSource.None, "")))
-                // 1. Camera-specific heuristics
-                .Then(p => GetCanonPatternFromName(request))
-                .Then(p => GetNikonPatternFromName(request))
-                .Then(p => GetSonyPatternFromName(request))
-                .Then(p => GetSmartphonePatternFromName(request))
-                // 2. Generic heuristics
-                .Then(p => GetGenericTimestampFromName(request))
-                .Then(p => GetEmbeddedTimestampFromName(request))
-                .Then(p => GetEpochSecondsFromName(request))
-                .Then(p => GetEpochMillisecondsFromName(request))
-                // 3. AVCHD (.mts / .m2ts)
-                .Then(p => GetTimestampFromAvchd(request))
-                .Build()
-            ;
-
-        var combinedResult = ResultCombiner.FirstSuccess(
+        var tryResult = ResultCombiner.FirstSuccess(
             // 1. Camera-specific heuristics
             () => GetCanonPatternFromName(request),
             () => GetSmartphonePatternFromName(request),
@@ -70,8 +52,8 @@ public partial class TimestampExtractor
             // 2. Generic heuristics
             () => GetGenericTimestampFromName(request),
             () => GetEmbeddedTimestampFromName(request),
+            () => GetEpochMillisecondsFromName(request), 
             () => GetEpochSecondsFromName(request),
-            () => GetEpochMillisecondsFromName(request),
             
             // 3. AVCHD (.mts / .m2ts)
             () => GetTimestampFromAvchd(request),
@@ -88,22 +70,31 @@ public partial class TimestampExtractor
             () => GetTimestampFromSidecars(request)
         );
 
-        if (combinedResult.IsSuccess)
+        if (tryResult.IsSuccess)
         {
-            var getFileNameResult = combinedResult.Value;
+            var getFileNameResult = tryResult.Value;
             var result = new TimestampResult()
             {
                 OriginalName = file.Name,
                 ResultingTimestamp = getFileNameResult.Timestamp,
-                Source = getFileNameResult.Source,
                 Response = getFileNameResult
             };
             return result;
         }
         else
         {
-            return Result<TimestampResult>.Failure(ErrorCode.NotFound,
-                $"Failed to extract timestamp from file '{file.Name}': {tryResult.Error}");
+            // Fallback
+            var result = new TimestampResult()
+            {
+                OriginalName = file.Name,
+                ResultingTimestamp = file.LastWriteTime,
+                Response = new GetFileTimestampResponse(
+                    file.LastWriteTime, 
+                    TimestampSource.FileSystemModifiedDate,
+                    $"No timestamp found in filename or metadata. Falling back to file's last modified date.")
+            };
+
+            return result;
         }
     }
 

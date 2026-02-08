@@ -2,7 +2,7 @@
 
 namespace Inamsoft.MediaFileRenamer.Services.Tests;
 
-public class NoTimestampTests
+public class TimestampExtractorNoTimestampTests
 {
     [Fact]
     public void ExtractTimestamp_NoMetadata_NoFilename_FallsBackToLastModified()

@@ -25,6 +25,5 @@ public readonly record struct TimestampResult()
 {
     public required string OriginalName { get; init; }
     public required DateTime ResultingTimestamp { get; init; }
-    public TimestampSource Source { get; init; } = TimestampSource.None;
     public required GetFileTimestampResponse Response { get; init; }
 }
