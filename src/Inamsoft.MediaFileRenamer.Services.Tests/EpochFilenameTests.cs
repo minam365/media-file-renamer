@@ -9,11 +9,12 @@ public class EpochFilenameTests
     {
         var file = TestFileHelper.GetVideo("SmartCam_1449172790453.mp4");
 
-        var ts = TimestampHelper.ExtractTimestamp(file);
+        var found = TimestampExtractor.TryExtractTimestamp(file, out var timestamp);
 
-        Assert.NotNull(ts);
+        Assert.True(found);
+        Assert.NotNull(timestamp);
         Assert.Equal(
             DateTimeOffset.FromUnixTimeMilliseconds(1449172790453).LocalDateTime,
-            ts.Value);
+            timestamp);
     }
 }

@@ -9,9 +9,10 @@ public class AviTests
     {
         var file = TestFileHelper.GetVideo("sample_avi.avi");
 
-        var ts = TimestampHelper.ExtractTimestamp(file);
-
-        Assert.NotNull(ts);
-        Assert.Equal(file.LastWriteTime, ts.Value);
+        var found = TimestampExtractor.TryExtractTimestamp(file, out var timestamp);
+        
+        Assert.True(found);
+        Assert.NotNull(timestamp);
+        Assert.Equal(file.LastWriteTime, timestamp);
     }
 }

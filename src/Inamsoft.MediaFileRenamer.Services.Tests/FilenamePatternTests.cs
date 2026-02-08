@@ -9,9 +9,10 @@ public class FilenamePatternTests
     {
         var file = TestFileHelper.GetVideo("20170304_191830.mp4");
 
-        var ts = TimestampHelper.ExtractTimestamp(file);
+        var found = TimestampExtractor.TryExtractTimestamp(file, out var timestamp);
 
-        Assert.NotNull(ts);
-        Assert.Equal(new DateTime(2017, 3, 4, 19, 18, 30), ts.Value);
+        Assert.True(found);
+        Assert.NotNull(timestamp);
+        Assert.Equal(new DateTime(2017, 3, 4, 19, 18, 30), timestamp);
     }
 }

@@ -9,9 +9,10 @@ public class ThreeGpTests
     {
         var file = TestFileHelper.GetVideo("sample_3gp.3gp");
 
-        var ts = TimestampHelper.ExtractTimestamp(file);
+        var found = TimestampExtractor.TryExtractTimestamp(file, out var timestamp);
 
-        Assert.NotNull(ts);
-        Assert.Equal(new DateTime(2022, 2, 14, 16, 20, 5), ts.Value);
+        Assert.True(found);
+        Assert.NotNull(timestamp);
+        Assert.Equal(new DateTime(2022, 2, 14, 16, 20, 5), timestamp);
     }
 }

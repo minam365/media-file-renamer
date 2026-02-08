@@ -18,9 +18,10 @@ public class QuickTimeVideoTests
     {
         var file = TestFileHelper.GetVideo(fileName);
 
-        var ts = TimestampHelper.ExtractTimestamp(file);
+        var found = TimestampExtractor.TryExtractTimestamp(file, out var timestamp);
 
-        Assert.NotNull(ts);
-        Assert.Equal(new DateTime(year, month, day, hour, minute, second), ts.Value);
+        Assert.True(found);
+        Assert.NotNull(timestamp);
+        Assert.Equal(new DateTime(year, month, day, hour, minute, second), timestamp);
     }
 }

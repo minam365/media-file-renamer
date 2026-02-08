@@ -9,9 +9,10 @@ public class MkvTests
     {
         var file = TestFileHelper.GetVideo("sample_mkv.mkv");
 
-        var ts = TimestampHelper.ExtractTimestamp(file);
+        var found = TimestampExtractor.TryExtractTimestamp(file, out var timestamp);
 
-        Assert.NotNull(ts);
-        Assert.Equal(file.LastWriteTime, ts.Value);
+        Assert.True(found);
+        Assert.NotNull(timestamp);
+        Assert.Equal(file.LastWriteTime, timestamp);
     }
 }

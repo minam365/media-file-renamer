@@ -21,10 +21,10 @@ public enum TimestampSource
     PsdMetadata
 }
 
-public sealed class TimestampResult
+public readonly record struct TimestampResult()
 {
-    public string OriginalName { get; init; } = "";
-    public DateTime? ResultingTimestamp { get; init; }
-    public TimestampSource Source { get; init; }
-    public List<string> Diagnostics { get; } = [];
+    public required string OriginalName { get; init; }
+    public required DateTime ResultingTimestamp { get; init; }
+    public TimestampSource Source { get; init; } = TimestampSource.None;
+    public required GetFileTimestampResponse Response { get; init; }
 }

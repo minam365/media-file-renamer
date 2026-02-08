@@ -9,9 +9,10 @@ public class NoTimestampTests
     {
         var file = TestFileHelper.GetVideo("DSC_2100.MP4");
 
-        var ts = TimestampHelper.ExtractTimestamp(file);
+        var found = TimestampExtractor.TryExtractTimestamp(file, out var timestamp);
 
-        Assert.NotNull(ts);
-        Assert.Equal(file.LastWriteTime, ts.Value);
+        Assert.True(found);
+        Assert.NotNull(timestamp);
+        Assert.Equal(file.LastWriteTime, timestamp);
     }
 }

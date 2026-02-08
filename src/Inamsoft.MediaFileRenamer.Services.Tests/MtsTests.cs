@@ -9,9 +9,10 @@ public class MtsTests
     {
         var file = TestFileHelper.GetVideo("sample.mts");
 
-        var ts = TimestampHelper.ExtractTimestamp(file);
+        var found = TimestampExtractor.TryExtractTimestamp(file, out var timestamp);
 
-        Assert.NotNull(ts);
-        Assert.Equal(new DateTime(2020, 6, 15, 14, 22, 10), ts.Value);
+        Assert.True(found);
+        Assert.NotNull(timestamp);
+        Assert.Equal(new DateTime(2020, 6, 15, 14, 22, 10), timestamp);
     }
 }
