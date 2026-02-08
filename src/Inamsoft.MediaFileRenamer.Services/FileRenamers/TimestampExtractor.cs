@@ -90,7 +90,7 @@ public partial class TimestampExtractor
 
         if (combinedResult.IsSuccess)
         {
-            var getFileNameResult = tryResult.Value;
+            var getFileNameResult = combinedResult.Value;
             var result = new TimestampResult()
             {
                 OriginalName = file.Name,
