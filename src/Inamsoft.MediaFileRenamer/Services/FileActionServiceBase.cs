@@ -1,12 +1,8 @@
-﻿using Inamsoft.Libs.MediaFileRenaming;
-using Inamsoft.Libs.MetadataProviders;
+﻿using Inamsoft.Libs.MetadataProviders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Inamsoft.MediaFileRenamer.Services;
 
@@ -56,7 +52,7 @@ internal abstract class BaseFileActionService
 
         
         var mediaFiles = sourceDirectoryInfo.GetFiles(sourceFilePattern, searchOption)
-                                            .Where(fi => fi.Exists && Inamsoft.Libs.MediaFileRenaming.FileNamingService.IsSupportedMediaFileExtension(fi.Extension))
+                                            .Where(fi => fi.Exists && FileNamingService.IsSupportedMediaFileExtension(fi.Extension))
                                             .Where(fi => fi.Length > minFileSizeInBytes)
                                             .OrderBy(fi => fi.DirectoryName)
                                             .ToArray();
