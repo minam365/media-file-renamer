@@ -8,6 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Abstractions\**" />
+    <EmbeddedResource Remove="Abstractions\**" />
+    <None Remove="Abstractions\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Spectre.Console" Version="0.54.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.53.1" />
@@ -18,10 +24,6 @@
     <ProjectReference Include="..\Inamsoft.Libs.SourceGenerators.Attributes\Inamsoft.Libs.SourceGenerators.Attributes.csproj" />
     <ProjectReference Include="..\Inamsoft.Libs.SourceGenerators\Inamsoft.Libs.SourceGenerators.csproj" />
     <ProjectReference Include="..\Inamsoft.MediaFileRenamer.Abstractions\Inamsoft.MediaFileRenamer.Abstractions.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Abstractions\" />
   </ItemGroup>
 
 </Project>
