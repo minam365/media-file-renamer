@@ -27,7 +27,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(fileName);
+        var result = provider.ReadMetadata(fileName);
 
         // Assert
         Assert.NotNull(result);
@@ -46,7 +46,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -58,8 +58,8 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         Assert.Equal(fileInfo.DirectoryName, result.FileMetadata.DirectoryName);
         Assert.True(result.FileMetadata.Exists);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -85,8 +85,8 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         Assert.Equal(fileInfo.DirectoryName, result.FileMetadata.DirectoryName);
         Assert.True(result.FileMetadata.Exists);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
 
     }
 
@@ -101,7 +101,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -113,8 +113,8 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         Assert.Equal(fileInfo.DirectoryName, result.FileMetadata.DirectoryName);
         Assert.True(result.FileMetadata.Exists);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
 
     }
 
@@ -128,7 +128,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -140,8 +140,8 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         Assert.Equal(fileInfo.DirectoryName, result.FileMetadata.DirectoryName);
         Assert.True(result.FileMetadata.Exists);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
 
     }
     
@@ -150,8 +150,8 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
     {
         var provider = _fixture.VideoFileMetadataProvider;
 
-        Assert.Throws<ArgumentNullException>(() => provider.ExtractMetadata(null!));
-        Assert.Throws<ArgumentException>(() => provider.ExtractMetadata(string.Empty));
-        Assert.Throws<ArgumentException>(() => provider.ExtractMetadata("   "));
+        Assert.Throws<ArgumentNullException>(() => provider.ReadMetadata(null!));
+        Assert.Throws<ArgumentException>(() => provider.ReadMetadata(string.Empty));
+        Assert.Throws<ArgumentException>(() => provider.ReadMetadata("   "));
     }
 }

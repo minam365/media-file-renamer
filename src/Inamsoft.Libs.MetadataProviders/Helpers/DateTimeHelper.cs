@@ -75,12 +75,11 @@ internal static class DateTimeHelper
             return true;
         }
 
-        if (DateTime.TryParse(input, s_invariant, DateTimeStyles.None, out var fallback))
-        {
-            result = fallback;
-            return true;
-        }
+        if (!DateTime.TryParse(input, s_invariant, DateTimeStyles.None, out var fallback)) 
+            return false;
+        
+        result = fallback;
+        return true;
 
-        return false;
     }
 }

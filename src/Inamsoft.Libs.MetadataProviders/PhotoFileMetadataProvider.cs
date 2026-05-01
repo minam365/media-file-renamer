@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Inamsoft.Libs.MetadataProviders;
 
-public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataProvider>, IPhotoFileMetadataProvider
+public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataProvider, PhotoFileMetadata>, IPhotoFileMetadataProvider
 {
     private readonly IFileMetadataProvider _fileMetadataProvider;
 
@@ -18,9 +18,9 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         _fileMetadataProvider = fileMetadataProvider;
     }
 
-    public PhotoFileMetadata ExtractMetadata(string filePath)
+    protected override PhotoFileMetadata InternalReadMetadata(FileInfo fileInfo)
     {
-        var fileMetadata = _fileMetadataProvider.ExtractMetadata(filePath);
+        var fileMetadata = _fileMetadataProvider.ReadMetadata(fileInfo);
         var photoMetadata = new PhotoFileMetadata()
         {
             FileMetadata = fileMetadata
@@ -29,10 +29,10 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         if (!fileMetadata.Exists)
             return photoMetadata;
 
-        if (!TryExtractMetadata(filePath, out ExtractMetadataResult getMetadataResult))
+        if (!TryExtractMetadata(fileInfo, out ExtractMetadataResult getMetadataResult))
         {
-            photoMetadata.TakenAt = fileMetadata.ModifiedAt;
-            photoMetadata.DigitizedAt = fileMetadata.ModifiedAt;
+            photoMetadata.TakenAt = fileMetadata.DateModified;
+            photoMetadata.DigitizedAt = fileMetadata.DateModified;
 
             return photoMetadata;
         }
@@ -105,7 +105,7 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         if (!takenAt.HasValue && digitizedAt.HasValue)
             return (digitizedAt.Value, digitizedAt.Value);
 
-        return (fileMetadata.ModifiedAt, fileMetadata.ModifiedAt);
+        return (fileMetadata.DateModified, fileMetadata.DateModified);
     }
 
     (string? Make, string? Model)? GetCameraInfo(IReadOnlyList<MetadataTag> tags)

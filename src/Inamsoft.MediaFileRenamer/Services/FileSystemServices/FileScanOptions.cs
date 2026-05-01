@@ -1,4 +1,5 @@
-﻿using Inamsoft.MediaFileRenamer.Services.Abstractions;
+﻿using Inamsoft.MediaFileRenamer.Abstractions;
+using Inamsoft.MediaFileRenamer.Services.Abstractions;
 
 namespace Inamsoft.MediaFileRenamer.Services.FileSystemServices;
 

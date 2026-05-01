@@ -25,7 +25,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -47,14 +47,14 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
         Assert.False(result.Exists);
         Assert.Equal(0, result.Length);
-        Assert.Equal(default(DateTime), result.CreatedAt);
-        Assert.Equal(default(DateTime), result.ModifiedAt);
+        Assert.Equal(default(DateTime), result.DateCreated);
+        Assert.Equal(default(DateTime), result.DateModified);
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -77,8 +77,8 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         Assert.Equal(fileInfo.DirectoryName ?? string.Empty, result.DirectoryName);
         Assert.True(result.Exists);
         Assert.Equal(fileInfo.Length, result.Length);
-        Assert.Equal(fileInfo.CreationTime, result.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.DateModified);
 
         // Cleanup
         File.Delete(filePath);
@@ -94,7 +94,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -117,7 +117,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -136,7 +136,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => provider.ExtractMetadata(null!));
+        Assert.Throws<ArgumentNullException>(() => provider.ReadMetadata(null!));
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => provider.ExtractMetadata(string.Empty));
+        Assert.Throws<ArgumentException>(() => provider.ReadMetadata(string.Empty));
     }
 
     [Fact]
@@ -156,7 +156,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => provider.ExtractMetadata("   "));
+        Assert.Throws<ArgumentException>(() => provider.ReadMetadata("   "));
     }
 
     [Fact]
@@ -170,7 +170,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -192,7 +192,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -211,7 +211,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -231,7 +231,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -254,7 +254,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -280,7 +280,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -300,8 +300,8 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result1 = provider.ExtractMetadata(filePath);
-        var result2 = provider.ExtractMetadata(filePath);
+        var result1 = provider.ReadMetadata(filePath);
+        var result2 = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result1);
@@ -322,19 +322,19 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var filePath = Path.GetTempFileName();
         File.WriteAllText(filePath, "initial content");
         var provider = _fixture.FileMetadataProvider;
-        var result1 = provider.ExtractMetadata(filePath);
+        var result1 = provider.ReadMetadata(filePath);
 
         // Wait a bit to ensure different timestamp
         System.Threading.Thread.Sleep(100);
 
         // Act
         File.WriteAllText(filePath, "modified content");
-        var result2 = provider.ExtractMetadata(filePath);
+        var result2 = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result1);
         Assert.NotNull(result2);
-        Assert.True(result2.ModifiedAt >= result1.ModifiedAt);
+        Assert.True(result2.DateModified >= result1.DateModified);
 
         // Cleanup
         File.Delete(filePath);
@@ -351,7 +351,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -374,7 +374,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -394,7 +394,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.ExtractMetadata(filePath);
+        var result = provider.ReadMetadata(filePath);
 
         // Assert
         Assert.IsType<FileMetadata>(result);

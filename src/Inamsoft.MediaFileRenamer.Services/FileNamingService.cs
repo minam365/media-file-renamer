@@ -94,17 +94,17 @@ public class FileNamingService : IFileNamingService
 
         if (_supportedPhotoFileExtensions.Contains(sourceFileInfo.Extension))
         {
-            var photoMetadata = _photoFileMetadataProvider.ExtractMetadata(sourceFilePath);
+            var photoMetadata = _photoFileMetadataProvider.ReadMetadata(sourceFilePath);
             return BuildTargetFilePath(targetFolderPath, photoMetadata, targetFileNamePrefix);
         }
         else if (_supportedVideoFileExtensions.Contains(sourceFileInfo.Extension))
         {
-            var videoMetadata = _videoFileMetadataProvider.ExtractMetadata(sourceFilePath);
+            var videoMetadata = _videoFileMetadataProvider.ReadMetadata(sourceFilePath);
             return BuildTargetFilePath(targetFolderPath, videoMetadata, targetFileNamePrefix);
         }
 
         // If neither photo nor video metadata exists, return the original file name
-        var fileMetadata = _fileMetadataProvider.ExtractMetadata(sourceFilePath);
+        var fileMetadata = _fileMetadataProvider.ReadMetadata(sourceFilePath);
         return BuildTargetFilePath (targetFolderPath, fileMetadata, targetFileNamePrefix);
     }
 
@@ -145,7 +145,7 @@ public class FileNamingService : IFileNamingService
     {
         var newFileName = SanitizeFileName(GenerateDefaultFileName(photoMetadata, targetFileNamePrefix: targetFileNamePrefix));
 
-        var pickedTimestamp = PickTimestamp(photoMetadata.TakenAt, photoMetadata.DigitizedAt, photoMetadata.FileMetadata.ModifiedAt);
+        var pickedTimestamp = PickTimestamp(photoMetadata.TakenAt, photoMetadata.DigitizedAt, photoMetadata.FileMetadata.DateModified);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
         var monthFolderName = $"{pickedTimestamp:MM}. {pickedTimestamp:MMMM}";
 
@@ -158,7 +158,7 @@ public class FileNamingService : IFileNamingService
     {
         var newFileName = SanitizeFileName(GenerateDefaultFileName(videoMetadata, targetFileNamePrefix: targetFileNamePrefix));
 
-        var pickedTimestamp = PickTimestamp(videoMetadata.CreatedAt, videoMetadata.ModifiedAt, videoMetadata.FileMetadata.ModifiedAt);
+        var pickedTimestamp = PickTimestamp(videoMetadata.CreatedAt, videoMetadata.ModifiedAt, videoMetadata.FileMetadata.DateModified);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
         var monthFolderName = $"{pickedTimestamp:MM}. {pickedTimestamp:MMMM}";
 
@@ -171,7 +171,7 @@ public class FileNamingService : IFileNamingService
     {
         var newFileName = SanitizeFileName(GenerateDefaultFileName(fileMetadata, targetFileNamePrefix));
 
-        var pickedTimestamp = PickTimestamp(fileMetadata.CreatedAt, fileMetadata.ModifiedAt, fileMetadata.ModifiedAt);
+        var pickedTimestamp = PickTimestamp(fileMetadata.DateCreated, fileMetadata.DateModified, fileMetadata.DateModified);
         var yearFolderName = pickedTimestamp.ToString("yyyy");
         var monthFolderName = $"{pickedTimestamp:MM}. {pickedTimestamp:MMMM}";
 
@@ -186,7 +186,7 @@ public class FileNamingService : IFileNamingService
         if (!string.IsNullOrEmpty(targetFileNamePrefix))
             sb.Append(targetFileNamePrefix).Append('_');
 
-        var timestamp = FormatTimestamp(photoFileMetadata.TakenAt, photoFileMetadata.DigitizedAt, photoFileMetadata.FileMetadata.ModifiedAt);
+        var timestamp = FormatTimestamp(photoFileMetadata.TakenAt, photoFileMetadata.DigitizedAt, photoFileMetadata.FileMetadata.DateModified);
         sb.Append(timestamp);
 
         var cameraInfo = FormatCameraInfo(photoFileMetadata.CameraMake, photoFileMetadata.CameraModel);
@@ -224,7 +224,7 @@ public class FileNamingService : IFileNamingService
         if (!string.IsNullOrEmpty(targetFileNamePrefix))
             sb.Append(targetFileNamePrefix).Append('_');
         
-        var timestamp = FormatTimestamp(videoFileMetadata.CreatedAt, videoFileMetadata.ModifiedAt, videoFileMetadata.FileMetadata.ModifiedAt);
+        var timestamp = FormatTimestamp(videoFileMetadata.CreatedAt, videoFileMetadata.ModifiedAt, videoFileMetadata.FileMetadata.DateModified);
         sb.Append(timestamp);
         if (includeImageDimensions)
         {
@@ -244,7 +244,7 @@ public class FileNamingService : IFileNamingService
         if (!string.IsNullOrEmpty(targetFileNamePrefix))
             sb.Append(targetFileNamePrefix).Append('_');
         
-        string timestamp = FormatTimestamp(fileMetadata.CreatedAt, fileMetadata.ModifiedAt, fileMetadata.ModifiedAt);
+        string timestamp = FormatTimestamp(fileMetadata.DateCreated, fileMetadata.DateModified, fileMetadata.DateModified);
         sb.Append(timestamp);
         sb.Append($"_{fileMetadata.Name}");
         return sb.ToString();

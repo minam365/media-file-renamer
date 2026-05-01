@@ -12,7 +12,7 @@ namespace Inamsoft.Libs.MetadataProviders;
 /// the base functionality for metadata retrieval and implements <see cref="IMetadataProvider{TMetadata}"/>
 /// to provide specific metadata processing for files using the <see cref="FileMetadata"/> container.
 /// </remarks>
-public class FileMetadataProvider : BaseMetadataProvider<FileMetadataProvider>, IFileMetadataProvider
+public class FileMetadataProvider : BaseMetadataProvider<FileMetadataProvider, FileMetadata>, IFileMetadataProvider
 {
     /// <summary>
     /// Represents a provider for retrieving metadata of files based on their paths or names.
@@ -28,41 +28,9 @@ public class FileMetadataProvider : BaseMetadataProvider<FileMetadataProvider>, 
     {
     }
 
-    /// <summary>
-    /// Retrieves metadata information for the specified file, including its path, name, extension, directory,
-    /// existence, timestamps, and size.
-    /// </summary>
-    /// <param name="filePath">The name or path of the file for which to retrieve metadata. Cannot be null, empty, or consist only of
-    /// white-space characters.</param>
-    /// <returns>A <see cref="FileMetadata"/> instance containing metadata about the specified file. If the file does not exist,
-    /// the returned object will indicate <see langword="false"/> for <c>Exists</c> and default values for other
-    /// properties.</returns>
-    public FileMetadata ExtractMetadata(string filePath)
+    protected override FileMetadata InternalReadMetadata(FileInfo fileInfo)
     {
-        Logger.LogDebug("Getting metadata info from the file: {Path}", filePath);
-
-        Guard.IsNotNullOrWhiteSpace(filePath, nameof(filePath));
-
-        FileInfo fileInfo = new(filePath);
-        var metadata = new FileMetadata(fileInfo)
-        {
-            Path = fileInfo.FullName,
-            Name = fileInfo.Name,
-            NameWithoutExtension = Path.GetFileNameWithoutExtension(filePath),
-            Extension = fileInfo.Extension,
-            DirectoryName = fileInfo.DirectoryName ?? string.Empty,
-            Exists = fileInfo.Exists
-        };
-
-        if (fileInfo.Exists)
-        {
-            metadata.CreatedAt = fileInfo.CreationTime;
-            metadata.ModifiedAt = fileInfo.LastWriteTime;
-            metadata.Length = fileInfo.Length;
-        }
-
-        Logger.LogDebug("Metadata info retrieved successfully from the file: {Path}", filePath);
-
+        var metadata = new FileMetadata(fileInfo);
         return metadata;
     }
 }

@@ -15,9 +15,9 @@ public class VideoFileMetadataProvider : BaseMetadataProvider<VideoFileMetadataP
         _fileMetadataProvider = fileMetadataProvider;
     }
 
-    public VideoFileMetadata ExtractMetadata(string filePath)
+    public VideoFileMetadata ReadMetadata(string filePath)
     {
-        var fileMetadata = _fileMetadataProvider.ExtractMetadata(filePath);
+        var fileMetadata = _fileMetadataProvider.ReadMetadata(filePath);
         var videoFileMetadata = new VideoFileMetadata()
         {
             FileMetadata = fileMetadata
@@ -28,8 +28,8 @@ public class VideoFileMetadataProvider : BaseMetadataProvider<VideoFileMetadataP
 
         if (!TryExtractMetadata(filePath, out ExtractMetadataResult getMetadataResult))
         {
-            videoFileMetadata.CreatedAt = fileMetadata.CreatedAt;
-            videoFileMetadata.ModifiedAt = fileMetadata.ModifiedAt;
+            videoFileMetadata.CreatedAt = fileMetadata.DateCreated;
+            videoFileMetadata.ModifiedAt = fileMetadata.DateModified;
 
             return videoFileMetadata;
         }
@@ -39,8 +39,8 @@ public class VideoFileMetadataProvider : BaseMetadataProvider<VideoFileMetadataP
         var tagList = getMetadataResult.MetadataTags;
 
         (DateTime? CreatedAt, DateTime? ModifiedAt) timestamps = GetTimestamps(tagList);
-        videoFileMetadata.CreatedAt = timestamps.CreatedAt ?? fileMetadata.ModifiedAt;
-        videoFileMetadata.ModifiedAt = timestamps.ModifiedAt ?? fileMetadata.ModifiedAt;
+        videoFileMetadata.CreatedAt = timestamps.CreatedAt ?? fileMetadata.DateModified;
+        videoFileMetadata.ModifiedAt = timestamps.ModifiedAt ?? fileMetadata.DateModified;
 
         var durationTag = tagList.FirstOrDefault(t => t.Name.Equals("Duration", StringComparison.OrdinalIgnoreCase));
         if (durationTag.HasValue && TimeSpan.TryParse(durationTag.Value, out var duration))

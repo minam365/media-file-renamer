@@ -11,5 +11,12 @@ public interface IMetadataProvider<TMetadata>
     /// </summary>
     /// <param name="filePath">The full path of the file from which metadata to obtain.</param>
     /// <returns>A <typeparamref name="TMetadata"/> object that contains the obtained metadata information.</returns>
-    TMetadata ExtractMetadata(string filePath);
+    TMetadata ReadMetadata(string filePath);
+
+    /// <summary>
+    /// Reads metadata of type TMetadata from the specified file.
+    /// </summary>
+    /// <param name="fileInfo">The FileInfo that identifies the file containing the metadata.</param>
+    /// <returns>The metadata read from the file as an instance of TMetadata.</returns>
+    TMetadata ReadMetadata(FileInfo fileInfo);
 }

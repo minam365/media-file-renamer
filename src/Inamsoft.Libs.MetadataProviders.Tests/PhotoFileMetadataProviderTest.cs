@@ -37,7 +37,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(fileName);
 
         // Act
-        var result = metadataProvider.ExtractMetadata(fileName);
+        var result = metadataProvider.ReadMetadata(fileName);
 
         // Assert
         Assert.NotNull(result);
@@ -58,7 +58,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.ExtractMetadata(filePath);
+        var result = _provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -68,8 +68,8 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         Assert.Equal(Path.GetFileNameWithoutExtension(filePath), result.FileMetadata.NameWithoutExtension);
         Assert.Equal(Path.GetExtension(filePath), result.FileMetadata.Extension);
         Assert.Equal(fileInfo.DirectoryName ?? string.Empty, result.FileMetadata.DirectoryName);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
         Assert.Equal("Apple", result.CameraMake);
         Assert.Equal("iPhone 13", result.CameraModel);
@@ -90,7 +90,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.ExtractMetadata(filePath);
+        var result = _provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -100,8 +100,8 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         Assert.Equal(Path.GetFileNameWithoutExtension(filePath), result.FileMetadata.NameWithoutExtension);
         Assert.Equal(Path.GetExtension(filePath), result.FileMetadata.Extension);
         Assert.Equal(fileInfo.DirectoryName ?? string.Empty, result.FileMetadata.DirectoryName);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
         Assert.Equal("samsung", result.CameraMake);
         Assert.Equal("SM-G781B", result.CameraModel);
@@ -122,7 +122,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.ExtractMetadata(filePath);
+        var result = _provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -132,8 +132,8 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         Assert.Equal(Path.GetFileNameWithoutExtension(filePath), result.FileMetadata.NameWithoutExtension);
         Assert.Equal(Path.GetExtension(filePath), result.FileMetadata.Extension);
         Assert.Equal(fileInfo.DirectoryName ?? string.Empty, result.FileMetadata.DirectoryName);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
         Assert.Equal("HUAWEI", result.CameraMake);
         Assert.Equal("LYA-L29", result.CameraModel);
@@ -154,7 +154,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.ExtractMetadata(filePath);
+        var result = _provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -164,8 +164,8 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         Assert.Equal(Path.GetFileNameWithoutExtension(filePath), result.FileMetadata.NameWithoutExtension);
         Assert.Equal(Path.GetExtension(filePath), result.FileMetadata.Extension);
         Assert.Equal(fileInfo.DirectoryName ?? string.Empty, result.FileMetadata.DirectoryName);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
         Assert.Equal("samsung", result.CameraMake);
         Assert.Equal("SM-G781B", result.CameraModel);
@@ -186,7 +186,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.ExtractMetadata(filePath);
+        var result = _provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -196,8 +196,8 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         Assert.Equal(Path.GetFileNameWithoutExtension(filePath), result.FileMetadata.NameWithoutExtension);
         Assert.Equal(Path.GetExtension(filePath), result.FileMetadata.Extension);
         Assert.Equal(fileInfo.DirectoryName ?? string.Empty, result.FileMetadata.DirectoryName);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
         Assert.Equal("Panasonic", result.CameraMake);
         Assert.Equal("DMC-FZ45", result.CameraModel);
@@ -217,7 +217,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.ExtractMetadata(filePath);
+        var result = _provider.ReadMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -227,8 +227,8 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         Assert.Equal(Path.GetFileNameWithoutExtension(filePath), result.FileMetadata.NameWithoutExtension);
         Assert.Equal(Path.GetExtension(filePath), result.FileMetadata.Extension);
         Assert.Equal(fileInfo.DirectoryName ?? string.Empty, result.FileMetadata.DirectoryName);
-        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.CreatedAt);
-        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.ModifiedAt);
+        Assert.Equal(fileInfo.CreationTime, result.FileMetadata.DateCreated);
+        Assert.Equal(fileInfo.LastWriteTime, result.FileMetadata.DateModified);
         Assert.Equal(fileInfo.Length, result.FileMetadata.Length);
         Assert.Null(result.CameraMake);
         Assert.Null(result.CameraModel);
@@ -249,7 +249,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         string fileName = null;
 
         // Act & Assert
-        var ex = Assert.Throws<ArgumentNullException>(() => _provider.ExtractMetadata(fileName));
+        var ex = Assert.Throws<ArgumentNullException>(() => _provider.ReadMetadata(fileName));
         Assert.Equal("Parameter \"filePath\" (string) must not be null or whitespace, was null. (Parameter 'filePath')", ex.Message);
     }
 
@@ -260,7 +260,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         string fileName = "  ";
 
         // Act & Assert
-        var ex = Assert.Throws<ArgumentException>(() => _provider.ExtractMetadata(fileName));
+        var ex = Assert.Throws<ArgumentException>(() => _provider.ReadMetadata(fileName));
         //Assert.Equal("Value cannot be null or whitespace. (Parameter 'fileName')", ex.Message);
     }
 }
