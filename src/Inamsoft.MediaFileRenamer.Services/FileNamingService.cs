@@ -53,17 +53,17 @@ public class FileNamingService : IFileNamingService
         _fileMetadataProvider = fileMetadataProvider;
     }
 
-    public static bool IsSupportedPhotoFileExtension(string fileExtension)
+    public bool IsSupportedPhotoFileExtension(string fileExtension)
     {
         return _supportedPhotoFileExtensions.Contains(fileExtension);
     }
 
-    public static bool IsSupportedVideoFileExtension(string fileExtension)
+    public bool IsSupportedVideoFileExtension(string fileExtension)
     {
         return _supportedVideoFileExtensions.Contains(fileExtension);
     }
 
-    public static bool IsSupportedMediaFileExtension(string fileExtension)
+    public bool IsSupportedMediaFileExtension(string fileExtension)
     {
         return IsSupportedPhotoFileExtension(fileExtension) || IsSupportedVideoFileExtension(fileExtension);
     }
@@ -94,17 +94,17 @@ public class FileNamingService : IFileNamingService
 
         if (_supportedPhotoFileExtensions.Contains(sourceFileInfo.Extension))
         {
-            var photoMetadata = _photoFileMetadataProvider.GetMetadata(sourceFilePath);
+            var photoMetadata = _photoFileMetadataProvider.ExtractMetadata(sourceFilePath);
             return BuildTargetFilePath(targetFolderPath, photoMetadata, targetFileNamePrefix);
         }
         else if (_supportedVideoFileExtensions.Contains(sourceFileInfo.Extension))
         {
-            var videoMetadata = _videoFileMetadataProvider.GetMetadata(sourceFilePath);
+            var videoMetadata = _videoFileMetadataProvider.ExtractMetadata(sourceFilePath);
             return BuildTargetFilePath(targetFolderPath, videoMetadata, targetFileNamePrefix);
         }
 
         // If neither photo nor video metadata exists, return the original file name
-        var fileMetadata = _fileMetadataProvider.GetMetadata(sourceFilePath);
+        var fileMetadata = _fileMetadataProvider.ExtractMetadata(sourceFilePath);
         return BuildTargetFilePath (targetFolderPath, fileMetadata, targetFileNamePrefix);
     }
 

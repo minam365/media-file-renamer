@@ -15,9 +15,9 @@ public class VideoFileMetadataProvider : BaseMetadataProvider<VideoFileMetadataP
         _fileMetadataProvider = fileMetadataProvider;
     }
 
-    public VideoFileMetadata GetMetadata(string filePath)
+    public VideoFileMetadata ExtractMetadata(string filePath)
     {
-        var fileMetadata = _fileMetadataProvider.GetMetadata(filePath);
+        var fileMetadata = _fileMetadataProvider.ExtractMetadata(filePath);
         var videoFileMetadata = new VideoFileMetadata()
         {
             FileMetadata = fileMetadata
@@ -26,7 +26,7 @@ public class VideoFileMetadataProvider : BaseMetadataProvider<VideoFileMetadataP
         if (!fileMetadata.Exists)
             return videoFileMetadata;
 
-        if (!TryReadMetadata(filePath, out GetMetadataResult getMetadataResult))
+        if (!TryExtractMetadata(filePath, out ExtractMetadataResult getMetadataResult))
         {
             videoFileMetadata.CreatedAt = fileMetadata.CreatedAt;
             videoFileMetadata.ModifiedAt = fileMetadata.ModifiedAt;

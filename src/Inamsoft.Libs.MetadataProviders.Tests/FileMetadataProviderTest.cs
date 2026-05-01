@@ -25,7 +25,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -47,7 +47,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -66,7 +66,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -94,7 +94,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -117,7 +117,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -136,7 +136,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => provider.GetMetadata(null!));
+        Assert.Throws<ArgumentNullException>(() => provider.ExtractMetadata(null!));
     }
 
     [Fact]
@@ -146,7 +146,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => provider.GetMetadata(string.Empty));
+        Assert.Throws<ArgumentException>(() => provider.ExtractMetadata(string.Empty));
     }
 
     [Fact]
@@ -156,7 +156,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => provider.GetMetadata("   "));
+        Assert.Throws<ArgumentException>(() => provider.ExtractMetadata("   "));
     }
 
     [Fact]
@@ -170,7 +170,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -192,7 +192,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -211,7 +211,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -231,7 +231,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -254,7 +254,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -280,7 +280,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -300,8 +300,8 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result1 = provider.GetMetadata(filePath);
-        var result2 = provider.GetMetadata(filePath);
+        var result1 = provider.ExtractMetadata(filePath);
+        var result2 = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result1);
@@ -322,14 +322,14 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var filePath = Path.GetTempFileName();
         File.WriteAllText(filePath, "initial content");
         var provider = _fixture.FileMetadataProvider;
-        var result1 = provider.GetMetadata(filePath);
+        var result1 = provider.ExtractMetadata(filePath);
 
         // Wait a bit to ensure different timestamp
         System.Threading.Thread.Sleep(100);
 
         // Act
         File.WriteAllText(filePath, "modified content");
-        var result2 = provider.GetMetadata(filePath);
+        var result2 = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result1);
@@ -351,7 +351,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -374,7 +374,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -394,7 +394,7 @@ public class FileMetadataProviderTest : IClassFixture<MetadataProviderFixture>
         var provider = _fixture.FileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.IsType<FileMetadata>(result);

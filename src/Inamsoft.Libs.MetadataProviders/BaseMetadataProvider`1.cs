@@ -15,33 +15,33 @@ public abstract class BaseMetadataProvider<TMetadataProvider>
     }
 
 
-    protected bool TryReadMetadata(string filePath, out GetMetadataResult result)
+    protected bool TryExtractMetadata(string filePath, out ExtractMetadataResult result)
     {
         try
         {
             var directories = ImageMetadataReader.ReadMetadata(filePath);
-            result = new GetMetadataResult(directories);
+            result = new ExtractMetadataResult(directories);
             return true;
         }
-        catch (Exception ex)
+        catch (Exception /* ex */)
         {
             //Logger.LogError(ex, "Failed to read metadata tags from file: {FilePath}", filePath);
-            result = new GetMetadataResult();
+            result = new ExtractMetadataResult();
             return false;
         }
     }
 
-    public readonly record struct GetMetadataResult
+    public readonly record struct ExtractMetadataResult
     {
         static readonly IReadOnlyList<MetadataTag> EmptyMetadataTags = [];
         static readonly Dictionary<string, IReadOnlyList<MetadataTag>> EmptyDirectoryToTagsMap = [];
 
-        public GetMetadataResult()
+        public ExtractMetadataResult()
         {
             Directories = [];
         }
 
-        public GetMetadataResult(IReadOnlyList<MetadataExtractor.Directory>? directories) : this()
+        public ExtractMetadataResult(IReadOnlyList<MetadataExtractor.Directory>? directories) : this()
         {
             Directories = directories ?? [];
         }

@@ -1,6 +1,7 @@
 ﻿using Inamsoft.Libs.MediaFileRenaming;
 using Inamsoft.Libs.MetadataProviders;
 using Inamsoft.Libs.MetadataProviders.Abstractions;
+using Inamsoft.MediaFileRenamer.Abstractions;
 using Inamsoft.MediaFileRenamer.Services;
 using Inamsoft.MediaFileRenamer.Services.Abstractions;
 using Microsoft.Extensions.DependencyInjection;

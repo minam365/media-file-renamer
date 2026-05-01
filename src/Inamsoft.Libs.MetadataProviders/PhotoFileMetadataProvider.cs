@@ -18,9 +18,9 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         _fileMetadataProvider = fileMetadataProvider;
     }
 
-    public PhotoFileMetadata GetMetadata(string filePath)
+    public PhotoFileMetadata ExtractMetadata(string filePath)
     {
-        var fileMetadata = _fileMetadataProvider.GetMetadata(filePath);
+        var fileMetadata = _fileMetadataProvider.ExtractMetadata(filePath);
         var photoMetadata = new PhotoFileMetadata()
         {
             FileMetadata = fileMetadata
@@ -29,7 +29,7 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         if (!fileMetadata.Exists)
             return photoMetadata;
 
-        if (!TryReadMetadata(filePath, out GetMetadataResult getMetadataResult))
+        if (!TryExtractMetadata(filePath, out ExtractMetadataResult getMetadataResult))
         {
             photoMetadata.TakenAt = fileMetadata.ModifiedAt;
             photoMetadata.DigitizedAt = fileMetadata.ModifiedAt;
@@ -128,7 +128,7 @@ public class PhotoFileMetadataProvider : BaseMetadataProvider<PhotoFileMetadataP
         return null;
     }
 
-    (int Height, int Width)? GetImageDimensions(GetMetadataResult getMetadataResult)
+    (int Height, int Width)? GetImageDimensions(ExtractMetadataResult getMetadataResult)
     {
         var directories = getMetadataResult.Directories;
         if (directories is null || directories.Count == 0)

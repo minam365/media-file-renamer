@@ -27,7 +27,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(fileName);
+        var result = provider.ExtractMetadata(fileName);
 
         // Assert
         Assert.NotNull(result);
@@ -46,7 +46,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -73,7 +73,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -101,7 +101,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -128,7 +128,7 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
         var provider = _fixture.VideoFileMetadataProvider;
 
         // Act
-        var result = provider.GetMetadata(filePath);
+        var result = provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -150,8 +150,8 @@ public class VideoFileMetadataProviderTest : IClassFixture<MetadataProviderFixtu
     {
         var provider = _fixture.VideoFileMetadataProvider;
 
-        Assert.Throws<ArgumentNullException>(() => provider.GetMetadata(null!));
-        Assert.Throws<ArgumentException>(() => provider.GetMetadata(string.Empty));
-        Assert.Throws<ArgumentException>(() => provider.GetMetadata("   "));
+        Assert.Throws<ArgumentNullException>(() => provider.ExtractMetadata(null!));
+        Assert.Throws<ArgumentException>(() => provider.ExtractMetadata(string.Empty));
+        Assert.Throws<ArgumentException>(() => provider.ExtractMetadata("   "));
     }
 }

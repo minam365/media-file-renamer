@@ -40,7 +40,7 @@ internal abstract class BaseFileActionService
     }
 
 
-    protected static FileInfo[] GetSourceMediaFiles(string sourceFolderPath, string sourceFilePattern, bool recursive, int minFileSizeInBytes)
+    protected FileInfo[] GetSourceMediaFiles(string sourceFolderPath, string sourceFilePattern, bool recursive, int minFileSizeInBytes)
     {
         var sourceDirectoryInfo = new DirectoryInfo(sourceFolderPath);
         if (!sourceDirectoryInfo.Exists)

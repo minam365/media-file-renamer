@@ -37,7 +37,7 @@ public class FileMetadataProvider : BaseMetadataProvider<FileMetadataProvider>, 
     /// <returns>A <see cref="FileMetadata"/> instance containing metadata about the specified file. If the file does not exist,
     /// the returned object will indicate <see langword="false"/> for <c>Exists</c> and default values for other
     /// properties.</returns>
-    public FileMetadata GetMetadata(string filePath)
+    public FileMetadata ExtractMetadata(string filePath)
     {
         Logger.LogDebug("Getting metadata info from the file: {Path}", filePath);
 

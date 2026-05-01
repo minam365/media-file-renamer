@@ -37,7 +37,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(fileName);
 
         // Act
-        var result = metadataProvider.GetMetadata(fileName);
+        var result = metadataProvider.ExtractMetadata(fileName);
 
         // Assert
         Assert.NotNull(result);
@@ -58,7 +58,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.GetMetadata(filePath);
+        var result = _provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -90,7 +90,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.GetMetadata(filePath);
+        var result = _provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -122,7 +122,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.GetMetadata(filePath);
+        var result = _provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -154,7 +154,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.GetMetadata(filePath);
+        var result = _provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -186,7 +186,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.GetMetadata(filePath);
+        var result = _provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -217,7 +217,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         var fileInfo = new FileInfo(filePath);
 
         // Act
-        var result = _provider.GetMetadata(filePath);
+        var result = _provider.ExtractMetadata(filePath);
 
         // Assert
         Assert.NotNull(result);
@@ -249,7 +249,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         string fileName = null;
 
         // Act & Assert
-        var ex = Assert.Throws<ArgumentNullException>(() => _provider.GetMetadata(fileName));
+        var ex = Assert.Throws<ArgumentNullException>(() => _provider.ExtractMetadata(fileName));
         Assert.Equal("Parameter \"filePath\" (string) must not be null or whitespace, was null. (Parameter 'filePath')", ex.Message);
     }
 
@@ -260,7 +260,7 @@ public class PhotoFileMetadataProviderTest: IClassFixture<MetadataProviderFixtur
         string fileName = "  ";
 
         // Act & Assert
-        var ex = Assert.Throws<ArgumentException>(() => _provider.GetMetadata(fileName));
+        var ex = Assert.Throws<ArgumentException>(() => _provider.ExtractMetadata(fileName));
         //Assert.Equal("Value cannot be null or whitespace. (Parameter 'fileName')", ex.Message);
     }
 }

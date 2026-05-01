@@ -17,6 +17,9 @@ public interface IFileNamingService
     /// <param name="targetFileNamePrefix">An optional prefix to include in the generated file name.</param>
     /// <returns>The full path to the target file including file name and extension.</returns>
     string GetTargetFilePath(string sourceFilePath, string targetFolderPath, string? targetFileNamePrefix = null);
+    bool IsSupportedMediaFileExtension(string fileExtension);
+    bool IsSupportedPhotoFileExtension(string fileExtension);
+    bool IsSupportedVideoFileExtension(string fileExtension);
 
     /// <summary>
     /// Generates a unique file path for a source file in the specified target folder,
