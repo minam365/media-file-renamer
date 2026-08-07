@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Inamsoft.Libs.MetadataProviders.Extensions;
 
-public static class MetadataDriectoryExtensions
+public static class MetadataDirectoryExtensions
 {
     /// <summary>
     /// Converts a collection of metadata directories into a read-only dictionary mapping directory names to their
