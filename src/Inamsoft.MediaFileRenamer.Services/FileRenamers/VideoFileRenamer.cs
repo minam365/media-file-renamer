@@ -10,7 +10,7 @@ public static class VideoFileRenamer
     {
         var pipeline = new RenamingPipeline(new IRenamingRule[]
         {
-            new TimestampPrefixRule(timestampStrategy),
+            new VideoFileRenamingTimestampPrefixRule(timestampStrategy),
             // Add more rules here (sanitization, uniqueness, etc.)
         });
 

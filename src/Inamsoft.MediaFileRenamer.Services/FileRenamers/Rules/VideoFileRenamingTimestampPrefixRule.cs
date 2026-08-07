@@ -2,11 +2,11 @@
 
 namespace Inamsoft.MediaFileRenamer.Services.FileRenamers.Rules;
 
-public sealed class TimestampPrefixRule : IRenamingRule
+public sealed class VideoFileRenamingTimestampPrefixRule : IRenamingRule
 {
     private readonly VideoFileRenamingTimestampStrategy _strategy;
 
-    public TimestampPrefixRule(VideoFileRenamingTimestampStrategy strategy)
+    public VideoFileRenamingTimestampPrefixRule(VideoFileRenamingTimestampStrategy strategy)
     {
         _strategy = strategy;
     }
