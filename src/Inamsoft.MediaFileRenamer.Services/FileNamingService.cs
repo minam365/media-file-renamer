@@ -1,7 +1,7 @@
-﻿using Inamsoft.Libs.MetadataProviders;
-using Inamsoft.Libs.MetadataProviders.Abstractions;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
+using Inamsoft.MediaFileRenamer.Services.MetadataProviderServices;
+using Inamsoft.MediaFileRenamer.Services.MetadataProviderServices.Models;
 
 namespace Inamsoft.MediaFileRenamer.Services;
 

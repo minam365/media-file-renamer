@@ -1,9 +1,9 @@
 ﻿using Inamsoft.Libs.MediaFileRenaming;
-using Inamsoft.Libs.MetadataProviders;
 using Inamsoft.Libs.MetadataProviders.Abstractions;
 using Inamsoft.MediaFileRenamer.Abstractions;
 using Inamsoft.MediaFileRenamer.Services;
 using Inamsoft.MediaFileRenamer.Services.Abstractions;
+using Inamsoft.MediaFileRenamer.Services.MetadataProviderServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -66,7 +66,7 @@ internal partial class MediaFileHelper
                         .ConfigureServices((context, services) =>
                         {
                             services.TryAddTransient<IPhotoFileMetadataProvider, PhotoFileMetadataProvider>();
-                            services.TryAddTransient<IFileMetadataProvider, FileMetadataProvider>();
+                            services.TryAddTransient<IFileMetadataProvider, TFileMetadataProvider>();
                             services.TryAddTransient<IVideoFileMetadataProvider, VideoFileMetadataProvider>();
                             services.TryAddTransient<IFileNamingService, FileNamingService>();
                         })

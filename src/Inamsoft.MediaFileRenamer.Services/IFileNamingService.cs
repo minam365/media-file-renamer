@@ -1,4 +1,4 @@
-﻿using Inamsoft.Libs.MetadataProviders.Abstractions;
+﻿using Inamsoft.MediaFileRenamer.Services.MetadataProviderServices.Models;
 
 namespace Inamsoft.MediaFileRenamer.Services;
 

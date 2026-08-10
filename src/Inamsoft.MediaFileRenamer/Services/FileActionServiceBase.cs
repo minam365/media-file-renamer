@@ -1,4 +1,4 @@
-﻿using Inamsoft.Libs.MetadataProviders;
+﻿using Inamsoft.MediaFileRenamer.Services.MetadataProviderServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
