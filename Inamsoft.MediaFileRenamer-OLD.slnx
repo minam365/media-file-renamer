@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solution Items/" />
+  <Project Path="src.old/Inamsoft.Libs.MediaFileRenaming.Tests/Inamsoft.Libs.MediaFileRenaming.Tests.csproj" Id="5931fe06-0c31-4f55-bd42-7cd002fc6208" />
+  <Project Path="src.old/Inamsoft.Libs.MetadataProviders.Tests/Inamsoft.Libs.MetadataProviders.Tests.csproj" />
+  <Project Path="src.old/Inamsoft.Libs.MetadataProviders/Inamsoft.Libs.MetadataProviders.csproj" Id="ef5545b5-ca40-48fc-8b2a-bd6787727912" />
+  <Project Path="src.old/Inamsoft.Libs.SourceGenerators.Attributes/Inamsoft.Libs.SourceGenerators.Attributes.csproj" Id="77d1ccb6-7d45-40db-8c4e-5846890b0790" />
+  <Project Path="src.old/Inamsoft.Libs.SourceGenerators.Tests/Inamsoft.Libs.SourceGenerators.Tests.csproj" Id="6407cf1b-3842-4b1c-bbc2-94415308b459" />
+  <Project Path="src.old/Inamsoft.Libs.SourceGenerators/Inamsoft.Libs.SourceGenerators.csproj" Id="422ad5de-bbed-4ffe-b086-15417f829fcc" />
+  <Project Path="src.old/Inamsoft.MediaFileRenamer.Abstractions/Inamsoft.MediaFileRenamer.Abstractions.csproj" Id="4fd7fa56-c432-441e-8d98-40c017cb6768" />
+  <Project Path="src.old/Inamsoft.MediaFileRenamer.Services.Tests/Inamsoft.MediaFileRenamer.Services.Tests.csproj" Id="6107ad3e-62a1-4422-a0f0-bb65bbf8bd72" />
+  <Project Path="src.old/Inamsoft.MediaFileRenamer.Services/Inamsoft.MediaFileRenamer.Services.csproj" Id="880ca2bf-03a2-4160-8d8b-75291da9f1de" />
+  <Project Path="src.old/Inamsoft.MediaFileRenamer/Inamsoft.MediaFileRenamer.csproj" />
+</Solution>
